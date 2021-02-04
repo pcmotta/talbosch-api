@@ -110,6 +110,7 @@ public class EstoqueController implements NegocioControllerAuditoria<Estoque, Es
     }
     
     @GetMapping("/tipos")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<LabelValue[]> buscarTipos( )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -124,6 +125,7 @@ public class EstoqueController implements NegocioControllerAuditoria<Estoque, Es
     }
     
     @GetMapping("/status")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<LabelValue[]> buscarStatus( )
     {
         if( LOGGER.isDebugEnabled( ) )

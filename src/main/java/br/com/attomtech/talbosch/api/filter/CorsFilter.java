@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,9 @@ import br.com.attomtech.talbosch.api.config.property.ApiProperty;
 public class CorsFilter implements Filter
 {
     private ApiProperty property;
+    
+    @Value("${spring.profiles.active:dsv}")
+    private String profile;
 
     @Autowired
     public CorsFilter( ApiProperty property )
@@ -38,7 +42,7 @@ public class CorsFilter implements Filter
         response.setHeader( "Access-Control-Allow-Origin",      property.getOriginPermitida( ) );
         response.setHeader( "Access-Control-Allow-Credentials", Boolean.TRUE.toString( )       );
         
-        if( "OPTIONS".equals( request.getMethod( ) ) && property.getOriginPermitida( ).equals( request.getHeader( "Origin" ) ) )
+        if( "OPTIONS".equals( request.getMethod( ) ) && ( "dsv".equals( profile ) || property.getOriginPermitida( ).equals( request.getHeader( "Origin" ) ) ) )
         {
             response.setHeader( "Access-Control-Allow-Methods", "POST, GET, DELETE, PUT, OPTIONS"     );
             response.setHeader( "Access-Control-Allow-Headers", "Authorization, Content-Type, Accept" );

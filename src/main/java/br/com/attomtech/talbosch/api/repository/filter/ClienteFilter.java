@@ -4,7 +4,8 @@ import br.com.attomtech.talbosch.api.model.enums.TipoPessoa;
 
 public class ClienteFilter
 {
-    public static final String NOME             = "nome",
+    public static final String CODIGO           = "codigo",
+                               NOME             = "nome",
                                CPFCNPJ          = "cpfCnpj",
                                TIPOPESSOA       = "tipoPessoa",
                                EMAIL            = "email",
@@ -12,11 +13,13 @@ public class ClienteFilter
                                LOGRADOURO       = "logradouro",
                                BAIRRO           = "bairro",
                                CEP              = "cep",
-                               NUMEROTELEFONE   = "numero";
+                               NUMEROTELEFONE   = "numero",
+                               ATIVO            = "ativo";
     
     public static final String ENDERECO = "enderecos",
                                TELEFONE = "telefones";
     
+    private Long       codigo;
     private String     nome;
     private Long       cpfCnpj;
     private TipoPessoa tipoPessoa;
@@ -115,5 +118,15 @@ public class ClienteFilter
     public void setNumeroTelefone( Long numero )
     {
         this.numeroTelefone = numero;
+    }
+
+    public Long getCodigo( )
+    {
+        return codigo;
+    }
+
+    public void setCodigo( Long codigo )
+    {
+        this.codigo = codigo;
     }
 }

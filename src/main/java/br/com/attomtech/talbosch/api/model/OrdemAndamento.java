@@ -1,6 +1,6 @@
 package br.com.attomtech.talbosch.api.model;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -11,6 +11,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Table(name = "ordem_servico_andamento")
@@ -34,8 +35,9 @@ public class OrdemAndamento
     @JoinColumn(name = "codigo_usuario")
     private Usuario usuario;
     
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     @NotNull(message = "Data do Andamento é obrigatório")
-    private LocalDate data;
+    private LocalDateTime data;
 
     public Long getCodigo( )
     {
@@ -77,12 +79,12 @@ public class OrdemAndamento
         this.usuario = usuario;
     }
 
-    public LocalDate getData( )
+    public LocalDateTime getData( )
     {
         return data;
     }
 
-    public void setData( LocalDate data )
+    public void setData( LocalDateTime data )
     {
         this.data = data;
     }

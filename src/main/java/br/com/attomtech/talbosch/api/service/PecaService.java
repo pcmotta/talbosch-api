@@ -1,6 +1,8 @@
 package br.com.attomtech.talbosch.api.service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import br.com.attomtech.talbosch.api.dto.PecaDTO;
 import br.com.attomtech.talbosch.api.exception.NegocioException;
 import br.com.attomtech.talbosch.api.model.Peca;
 import br.com.attomtech.talbosch.api.repository.PecaRepository;
@@ -39,6 +42,16 @@ public class PecaService extends AuditoriaService<Peca> implements NegocioServic
         return pagina;
     }
     
+    public List<PecaDTO> buscarPecas( )
+    {
+        if( LOGGER.isDebugEnabled( ) )
+            LOGGER.debug( "Buscando peças" );
+        
+        List<Peca> pecas = repository.findAll( );
+        
+        return pecas.stream( ).map( peca -> new PecaDTO( peca ) ).collect( Collectors.toList( ) );
+    }
+    
     @Override
     public Peca cadastrar( Peca peca, String login )
     {
@@ -49,7 +62,6 @@ public class PecaService extends AuditoriaService<Peca> implements NegocioServic
             throw new NegocioException( "Peça já existe" );
         
         atualizarAuditoriaInclusao( peca, login );
-        tratarModelos( peca );
         
         return salvar( peca );
     }
@@ -67,7 +79,6 @@ public class PecaService extends AuditoriaService<Peca> implements NegocioServic
         
         atualizarAuditoriaAlteracao( pecaSalva, login );
         peca.setAuditoria( pecaSalva.getAuditoria( ) );
-        tratarModelos( peca );
         
         return salvar( peca );
     }
@@ -104,10 +115,4 @@ public class PecaService extends AuditoriaService<Peca> implements NegocioServic
         
         return pecaOpt.orElseThrow( ( ) -> new NegocioException( "Peça não encontrada" ) );
     }
-    
-    private void tratarModelos( Peca peca )
-    {
-        peca.getModelos( ).forEach( modelo -> modelo.setPeca( peca ) );
-    }
-
 }

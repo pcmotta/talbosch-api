@@ -1,5 +1,6 @@
 package br.com.attomtech.talbosch.api.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -39,16 +40,42 @@ public class ClienteService extends AuditoriaService<Cliente> implements Negocio
         return pagina;
     }
     
+    public List<Cliente> buscarTodosClientes( )
+    {
+        List<Cliente> clientes = repository.findAll( );
+        
+        return clientes;
+    }
+    
     @Override
     public Cliente cadastrar( Cliente cliente, String login )
     {
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Cadastrando > {}", cliente );
         
-        if( cliente.getCpfCnpj( ) != null && repository.countByCpfCnpj( cliente.getCpfCnpj( ) ) > 0 )
-            throw new NegocioException( String.format( "%s já cadastrado", cliente.isPessoaFisica( ) ? "CPF" : "CNPJ" ) );
+        if( cliente.getCpfCnpj( ) != null )
+        {
+            Optional<Cliente> clienteOpt = repository.findByCpfCnpj( cliente.getCpfCnpj( ) );
+            
+            if( clienteOpt.isPresent( ) )
+            {
+                Cliente clienteSalvo = clienteOpt.get( );
+                
+                if( clienteSalvo.isAtivo( ) )
+                    throw new NegocioException( String.format( "%s já cadastrado", cliente.isPessoaFisica( ) ? "CPF" : "CNPJ" ) );
+                else
+                {
+                    cliente.setCodigo( clienteSalvo.getCodigo( ) );
+                    cliente.setAuditoria( clienteSalvo.getAuditoria( ) );
+                }
+            }
+        }
         
-        atualizarAuditoriaInclusao( cliente, login );
+        if( cliente.getCodigo( ) != null )
+            atualizarAuditoriaAlteracao( cliente, login );
+        else
+            atualizarAuditoriaInclusao( cliente, login );
+        
         tratarAssociacoes( cliente );
         
         return salvar( cliente );

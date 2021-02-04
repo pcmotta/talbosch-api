@@ -21,7 +21,7 @@ public class ClienteRepositoryImpl extends RepositoryImpl<ClienteFilter, Cliente
     @Override
     public Page<Cliente> pesquisar( ClienteFilter filtro, Pageable pageable )
     {
-        return pesquisarDados( filtro, pageable );
+        return pesquisarDados( filtro, pageable, "nome" );
     }
 
     @Override
@@ -29,6 +29,9 @@ public class ClienteRepositoryImpl extends RepositoryImpl<ClienteFilter, Cliente
     {
         List<Predicate> predicates = new ArrayList<Predicate>( );
         Join<Object, Object> endereco = null;
+        
+        if( filtro.getCodigo( ) != null )
+            predicates.add( builder.equal( from.get( ClienteFilter.CODIGO ), filtro.getCodigo( ) ) );
         
         if( StringUtils.hasText( filtro.getNome( ) ) )
             predicates.add( builder.like( builder.lower( from.get( ClienteFilter.NOME ) ), "%" + filtro.getNome( ).toLowerCase( ) + "%" ) );
@@ -72,6 +75,8 @@ public class ClienteRepositoryImpl extends RepositoryImpl<ClienteFilter, Cliente
             Join<Object, Object> telefone = from.join( ClienteFilter.TELEFONE );
             predicates.add( builder.equal( telefone.get( ClienteFilter.NUMEROTELEFONE ), filtro.getNumeroTelefone( ) ) );
         }
+        
+        predicates.add( builder.equal( from.get( ClienteFilter.ATIVO ), true ) );
         
         return predicates.toArray( new Predicate[predicates.size( )] );
     }

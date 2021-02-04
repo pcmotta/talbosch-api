@@ -34,6 +34,8 @@ public class UsuarioRepositoryImpl extends RepositoryImpl<UsuarioFilter, Usuario
         if( filtro.isAtivo( ) != null )
             predicates.add( builder.equal( from.get( UsuarioFilter.ATIVO ), filtro.isAtivo( ) ) );
         
+        predicates.add( builder.notEqual( from.get( UsuarioFilter.CODIGO ), 1 ) );
+        
         return predicates.toArray( new Predicate[predicates.size( )] );
     }
     

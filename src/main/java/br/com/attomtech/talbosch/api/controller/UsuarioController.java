@@ -1,5 +1,7 @@
 package br.com.attomtech.talbosch.api.controller;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.IntStream;
 
 import javax.validation.Valid;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.attomtech.talbosch.api.controller.interfaces.NegocioControllerAuditoria;
+import br.com.attomtech.talbosch.api.dto.UsuarioDTO;
 import br.com.attomtech.talbosch.api.model.Usuario;
 import br.com.attomtech.talbosch.api.model.enums.Permissao;
 import br.com.attomtech.talbosch.api.repository.filter.UsuarioFilter;
@@ -35,7 +38,7 @@ public class UsuarioController implements NegocioControllerAuditoria<Usuario, Us
 {
     private static final Logger LOGGER = LoggerFactory.getLogger( UsuarioController.class );
     
-    @Autowired
+    @Autowired  
     private UsuarioService service;
     
     @Override
@@ -103,6 +106,22 @@ public class UsuarioController implements NegocioControllerAuditoria<Usuario, Us
         return ResponseEntity.ok( ).build( );
     }
     
+    @GetMapping("/todos")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<UsuarioDTO>> buscarAtivos( )
+    {
+        if( LOGGER.isDebugEnabled( ) )
+            LOGGER.debug( "Buscando usuários" );
+        
+        List<Usuario> usuariosAtivos = service.buscarUsuarios( );
+        List<UsuarioDTO> usuarios = new ArrayList<UsuarioDTO>( );
+        
+        usuariosAtivos.forEach( usuario -> 
+            usuarios.add( new UsuarioDTO( usuario ) ) );
+        
+        return ResponseEntity.ok( usuarios );
+    }
+    
     @GetMapping("/permissoes")
     @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('USUARIO')")
     public ResponseEntity<LabelValue[]> buscarPermissoes( Authentication auth )
@@ -116,8 +135,7 @@ public class UsuarioController implements NegocioControllerAuditoria<Usuario, Us
         if( usuario.isAdministrador( ) )
             permissoes = Permissao.values( );
         else
-            permissoes = usuario.getPermissoes( ).stream( ).map( permissao -> permissao.getPermissao( ) )
-                    .toArray( size -> new Permissao[size] );
+            permissoes = usuario.getPermissoes( ).stream( ).toArray( size -> new Permissao[size] );
         
         LabelValue[] values = new LabelValue[permissoes.length];
         IntStream.range( 0, permissoes.length ).forEach( index ->

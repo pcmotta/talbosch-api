@@ -1,5 +1,6 @@
 package br.com.attomtech.talbosch.api.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -10,7 +11,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import br.com.attomtech.talbosch.api.exception.NegocioException;
+import br.com.attomtech.talbosch.api.model.Estoque;
 import br.com.attomtech.talbosch.api.model.OrdemServico;
+import br.com.attomtech.talbosch.api.repository.EstoqueRepository;
 import br.com.attomtech.talbosch.api.repository.OrdemServicoRepository;
 import br.com.attomtech.talbosch.api.repository.filter.OrdemServicoFilter;
 import br.com.attomtech.talbosch.api.service.interfaces.NegocioServiceAuditoria;
@@ -21,11 +24,15 @@ public class OrdemServicoService extends AuditoriaService<OrdemServico> implemen
     private static final Logger LOGGER = LoggerFactory.getLogger( OrdemServicoService.class );
 
     private OrdemServicoRepository repository;
+    private EstoqueRepository      estoqueRepository;
+    private UsuarioService         usuarioService;
     
     @Autowired
-    public OrdemServicoService( OrdemServicoRepository repository )
+    public OrdemServicoService( OrdemServicoRepository repository, EstoqueRepository estoqueRepository, UsuarioService usuarioService )
     {
         this.repository = repository;
+        this.estoqueRepository = estoqueRepository;
+        this.usuarioService = usuarioService;
     }
 
     @Override
@@ -65,12 +72,12 @@ public class OrdemServicoService extends AuditoriaService<OrdemServico> implemen
             LOGGER.debug( "Cadastrando > {}", ordem );
         
         atualizarAuditoriaInclusao( ordem, login );
-        tratarRelacionamentos( ordem );
+        tratarRelacionamentos( ordem, login );
         
         return salvar( ordem );
     }
     
-    private void tratarRelacionamentos( OrdemServico ordem )
+    private void tratarRelacionamentos( OrdemServico ordem, String login )
     {
         ordem.getEndereco( ).setOrdem( ordem );
         ordem.getProduto( ).setOrdem( ordem );
@@ -79,7 +86,12 @@ public class OrdemServicoService extends AuditoriaService<OrdemServico> implemen
             ordem.getValores( ).forEach( valor -> valor.setOrdem( ordem ) );
         
         if( ordem.temAndamento( ) )
-            ordem.getAndamentos( ).forEach( andamento -> andamento.setOrdem( ordem ) );
+            ordem.getAndamentos( ).forEach( andamento -> {
+                andamento.setOrdem( ordem );
+                
+                if( andamento.getUsuario( ) == null )
+                    andamento.setUsuario( usuarioService.buscarPorLogin( login ) );
+            });
     }
     
     @Override
@@ -92,7 +104,7 @@ public class OrdemServicoService extends AuditoriaService<OrdemServico> implemen
         
         ordem.setAuditoria( ordemSalva.getAuditoria( ) );
         atualizarAuditoriaAlteracao( ordem, login );
-        tratarRelacionamentos( ordem );
+        tratarRelacionamentos( ordem, login );
         
         return salvar( ordem );
     }
@@ -102,6 +114,11 @@ public class OrdemServicoService extends AuditoriaService<OrdemServico> implemen
     {
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Excluíndo > {}", numero );
+        
+        Optional<List<Estoque>> estoques = estoqueRepository.findByOrdemServicoNumero( numero );
+        
+        if( estoques.isPresent( ) )
+            throw new NegocioException( "Não é possível excluir, pois existem peças no estoque associadas a essa ordem de serviço" );
         
         repository.deleteById( numero );
     }

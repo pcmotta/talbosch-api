@@ -17,7 +17,7 @@ public class UsuarioSistema extends User
     {
         super( usuario.getLogin( ), usuario.getSenha( ), 
                 usuario.getPermissoes( ).stream( ).map( permissao -> 
-                    new SimpleGrantedAuthority( permissao.getPermissao( ).toString( ) ) ).collect( Collectors.toList( ) ) );
+                    new SimpleGrantedAuthority( permissao.toString( ) ) ).collect( Collectors.toList( ) ) );
         this.usuario = usuario;
     }
     

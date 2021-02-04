@@ -1,6 +1,8 @@
 package br.com.attomtech.talbosch.api.security;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +32,7 @@ public class AppUserDetailsService implements UserDetailsService
         Optional<Usuario> usuarioOpt = repository.findByLoginAndAtivoTrue( login );
         Usuario usuario = usuarioOpt.orElseThrow( ( ) -> new UsernameNotFoundException( "Usuário e/ou Senha incorretos!" ) );
         
-        usuario.setUltimoAcesso( LocalDateTime.now( ) );
+        usuario.setUltimoAcesso( LocalDateTime.ofInstant( Instant.now( ), ZoneId.of( "GMT-3" ) ) );
         service.salvar( usuario );
         
         return new UsuarioSistema( usuario );

@@ -1,7 +1,9 @@
 package br.com.attomtech.talbosch.api.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +42,16 @@ public class UsuarioService implements NegocioServiceAuditoria<Usuario, UsuarioF
         return pagina;
     }
     
+    public List<Usuario> buscarUsuarios( )
+    {
+        if( LOGGER.isDebugEnabled( ) )
+            LOGGER.debug( "Buscando usuários" );
+
+        List<Usuario> usuarios = repository.findAll( );
+        
+        return usuarios.stream( ).filter( u -> u.getCodigo( ) > 1 ).collect( Collectors.toList( ) );
+    }
+    
     @Override
     public Usuario cadastrar( Usuario usuario, String login )
     {
@@ -47,8 +59,6 @@ public class UsuarioService implements NegocioServiceAuditoria<Usuario, UsuarioF
             LOGGER.debug( "Cadastrando > {}", usuario );
         
         Usuario usuarioLogado = buscarPorLogin( login );
-        
-        tratarPermissoes( usuario );
         
         usuario.getAuditoria( ).setIncluidoPor( usuarioLogado );
         usuario.getAuditoria( ).setIncluidoEm( LocalDateTime.now( ) );
@@ -72,8 +82,6 @@ public class UsuarioService implements NegocioServiceAuditoria<Usuario, UsuarioF
             usuario.setSenha( passwordEncoder.encode( usuario.getSenha( ) ) );
         else
             usuario.setSenha( usuarioSalvo.getSenha( ) );
-        
-        tratarPermissoes( usuario );
         
         Usuario usuarioLogado = buscarPorLogin( login );
         usuario.setAuditoria( usuarioSalvo.getAuditoria( ) );
@@ -126,10 +134,5 @@ public class UsuarioService implements NegocioServiceAuditoria<Usuario, UsuarioF
         Optional<Usuario> usuarioOpt = repository.findByLoginAndAtivoTrue( login );
         
         return usuarioOpt.orElseThrow( ( ) -> new NegocioException( "Usuário não encontrado" ) );
-    }
-    
-    private void tratarPermissoes( Usuario usuario )
-    {
-        usuario.getPermissoes( ).forEach( permissao -> permissao.setUsuario( usuario ) );
     }
 }

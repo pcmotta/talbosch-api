@@ -3,20 +3,22 @@ package br.com.attomtech.talbosch.api.model;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 
 import org.hibernate.validator.group.GroupSequenceProvider;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
@@ -46,10 +48,12 @@ public class Usuario extends Model
     private LocalDateTime ultimoAcesso;
     private boolean       ativo = true;
 
-    @JsonIgnoreProperties("usuario")
-    @OneToMany(mappedBy = "usuario", targetEntity = UsuarioPermissao.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UsuarioPermissao> permissoes;
-
+    @ElementCollection(targetClass = Permissao.class)
+    @JoinTable(name = "usuario_permissao", joinColumns = @JoinColumn(name = "codigo_usuario"))
+    @Column(name = "permissao", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private List<Permissao> permissoes;
+    
     @JsonIgnore
     public boolean isNovo( )
     {
@@ -59,7 +63,7 @@ public class Usuario extends Model
     @JsonIgnore
     public boolean isAdministrador( )
     {
-        return permissoes.stream( ).filter( permissao -> permissao.getPermissao( ) == Permissao.ADMINISTRADOR )
+        return permissoes.stream( ).filter( permissao -> permissao == Permissao.ADMINISTRADOR )
                 .count( ) > 0;
     }
 
@@ -123,12 +127,12 @@ public class Usuario extends Model
         this.ativo = ativo;
     }
 
-    public List<UsuarioPermissao> getPermissoes( )
+    public List<Permissao> getPermissoes( )
     {
         return permissoes;
     }
 
-    public void setPermissoes( List<UsuarioPermissao> permissoes )
+    public void setPermissoes( List<Permissao> permissoes )
     {
         this.permissoes = permissoes;
     }

@@ -1,5 +1,6 @@
 package br.com.attomtech.talbosch.api.controller;
 
+import java.util.List;
 import java.util.stream.IntStream;
 
 import javax.validation.Valid;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.attomtech.talbosch.api.controller.interfaces.NegocioControllerAuditoria;
+import br.com.attomtech.talbosch.api.dto.PecaDTO;
 import br.com.attomtech.talbosch.api.model.Peca;
 import br.com.attomtech.talbosch.api.model.enums.Aparelho;
 import br.com.attomtech.talbosch.api.model.enums.Fabricante;
@@ -41,7 +43,7 @@ public class PecaController implements NegocioControllerAuditoria<Peca, PecaFilt
     
     @Override
     @GetMapping
-    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('PECA')")
+    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('CADASTROPECA')")
     public ResponseEntity<Page<Peca>> pesquisar( PecaFilter filtro, Pageable pageable )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -54,7 +56,7 @@ public class PecaController implements NegocioControllerAuditoria<Peca, PecaFilt
     
     @Override
     @PostMapping
-    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('PECA')")
+    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('CADASTROPECA')")
     public ResponseEntity<Peca> cadastrar( @RequestBody @Valid Peca peca, Authentication auth )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -67,7 +69,7 @@ public class PecaController implements NegocioControllerAuditoria<Peca, PecaFilt
     
     @Override
     @PutMapping
-    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('PECA')")
+    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('CADASTROPECA')")
     public ResponseEntity<Peca> atualizar( @RequestBody @Valid Peca peca, Authentication auth )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -80,7 +82,7 @@ public class PecaController implements NegocioControllerAuditoria<Peca, PecaFilt
     
     @Override
     @GetMapping("/{codigo}")
-    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('PECA')")
+    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('CADASTROPECA')")
     public ResponseEntity<Peca> buscarPorCodigo( @PathVariable String codigo )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -92,8 +94,8 @@ public class PecaController implements NegocioControllerAuditoria<Peca, PecaFilt
     }
     
     @Override
-    @DeleteMapping("{codigo}")
-    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('PECA')")
+    @DeleteMapping("/{codigo}")
+    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('CADASTROPECA')")
     public ResponseEntity<Void> excluir( @PathVariable String codigo, Authentication auth )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -105,7 +107,7 @@ public class PecaController implements NegocioControllerAuditoria<Peca, PecaFilt
     }
     
     @GetMapping("/aparelhos")
-    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('PECA')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<LabelValue[]> buscarAparelhos( )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -121,7 +123,7 @@ public class PecaController implements NegocioControllerAuditoria<Peca, PecaFilt
     }
     
     @GetMapping("/fabricantes")
-    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('PECA')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<LabelValue[]> buscarFabricantes( )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -134,5 +136,17 @@ public class PecaController implements NegocioControllerAuditoria<Peca, PecaFilt
             values[index] = new LabelValue( fabricantes[index].toString( ), fabricantes[index].getNome( ) ) );
         
         return ResponseEntity.ok( values );
+    }
+    
+    @GetMapping("/todas")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<PecaDTO>> buscarTodas( )
+    {
+        if( LOGGER.isDebugEnabled( ) )
+            LOGGER.debug( "Buscando Peças" );
+        
+        List<PecaDTO> pecas = service.buscarPecas( );
+        
+        return ResponseEntity.ok( pecas );
     }
 }

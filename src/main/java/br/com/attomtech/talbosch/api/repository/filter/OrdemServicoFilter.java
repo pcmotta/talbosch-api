@@ -2,6 +2,8 @@ package br.com.attomtech.talbosch.api.repository.filter;
 
 import java.time.LocalDate;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import br.com.attomtech.talbosch.api.model.Cliente;
 import br.com.attomtech.talbosch.api.model.Tecnico;
 import br.com.attomtech.talbosch.api.model.enums.Aparelho;
@@ -26,15 +28,26 @@ public class OrdemServicoFilter
                                APARELHO        = "aparelho",
                                FABRICANTE      = "fabricante";
                                 
-    
-    private Long        numero;
-    private Cliente     cliente;
-    private TipoOrdem   tipo;
-    private LocalDate   dataChamadaDe;
-    private LocalDate   dataChamadaAte;
-    private LocalDate   dataAtendimentoDe;
-    private LocalDate   dataAtendimentoAte;
-    private LocalDate   dataBaixaDe;
+    private Long      numero;
+    private Cliente   cliente;
+    private TipoOrdem tipo;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate dataChamadaDe;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate dataChamadaAte;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate dataAtendimentoDe;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate dataAtendimentoAte;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate dataBaixaDe;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate   dataBaixaAte;
     private Tecnico     tecnico;
     private StatusOrdem status;

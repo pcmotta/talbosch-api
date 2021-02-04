@@ -15,8 +15,6 @@ public class PecaFilter
                                MODELO          = "modelos",
                                APARELHO        = "aparelho",
                                FABRICANTE      = "fabricante",
-                               MODELODESCRICAO = "modelo",
-                               MODELOID        = "id",
                                ATIVO           = "ativo";
     
     private String     codigo;

@@ -1,5 +1,8 @@
 package br.com.attomtech.talbosch.api.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -21,6 +24,7 @@ import br.com.attomtech.talbosch.api.controller.interfaces.NegocioController;
 import br.com.attomtech.talbosch.api.model.Tecnico;
 import br.com.attomtech.talbosch.api.repository.filter.TecnicoFilter;
 import br.com.attomtech.talbosch.api.service.TecnicoService;
+import br.com.attomtech.talbosch.api.utils.LabelValue;
 
 @RestController
 @RequestMapping("/tecnicos")
@@ -98,5 +102,20 @@ public class TecnicoController implements NegocioController<Tecnico, TecnicoFilt
         service.excluir( codigo );
         
         return ResponseEntity.noContent( ).build( );
+    }
+    
+    @GetMapping("/ativos")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<LabelValue>> buscarAtivos( )
+    {
+        if( LOGGER.isDebugEnabled( ) )
+            LOGGER.debug( "Buscando Ativos" );
+        
+        List<Tecnico> tecnicos = service.buscarAtivos( );
+        List<LabelValue> tecnicosAtivos = new ArrayList<LabelValue>( );
+        
+        tecnicos.forEach( tecnico -> tecnicosAtivos.add( new LabelValue( tecnico.getCodigo( ), tecnico.getNome( ) ) ) );
+        
+        return ResponseEntity.ok( tecnicosAtivos );
     }
 }

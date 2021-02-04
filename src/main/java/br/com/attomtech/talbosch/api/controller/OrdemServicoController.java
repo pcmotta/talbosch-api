@@ -111,6 +111,7 @@ public class OrdemServicoController implements NegocioControllerAuditoria<OrdemS
     }
     
     @GetMapping("/status")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<LabelValue[]> buscarStatus( )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -126,6 +127,7 @@ public class OrdemServicoController implements NegocioControllerAuditoria<OrdemS
     }
     
     @GetMapping("/tipos")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<LabelValue[]> buscarTipos( )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -141,6 +143,7 @@ public class OrdemServicoController implements NegocioControllerAuditoria<OrdemS
     }
     
     @GetMapping("/tipos-valor")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<LabelValue[]> buscarTiposValor( )
     {
         if( LOGGER.isDebugEnabled( ) )

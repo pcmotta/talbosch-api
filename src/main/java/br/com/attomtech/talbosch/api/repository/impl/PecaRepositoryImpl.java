@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -54,11 +53,7 @@ public class PecaRepositoryImpl extends RepositoryImpl<PecaFilter, Peca> impleme
             predicates.add( builder.lessThanOrEqualTo( from.get( PecaFilter.VALORMAODEOBRA ), filtro.getValorMaoDeObraAte( ) ) );
         
         if( StringUtils.hasText( filtro.getModelo( ) ) )
-        {
-            Join<Object, Object> modelo = from.join( PecaFilter.MODELO );
-            predicates.add( builder.like( builder.lower( modelo.get( PecaFilter.MODELOID ).get( PecaFilter.MODELODESCRICAO ) ), 
-                    "%" + filtro.getModelo( ).toLowerCase( ) + "%" ) );
-        }
+            predicates.add( builder.isMember( filtro.getModelo( ), from.get( PecaFilter.MODELO ) ) );
         
         if( filtro.getAparelho( ) != null )
             predicates.add( builder.equal( from.get( PecaFilter.APARELHO ), filtro.getAparelho( ) ) );

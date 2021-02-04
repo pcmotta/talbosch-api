@@ -2,7 +2,6 @@ package br.com.attomtech.talbosch.api.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,7 +53,11 @@ public class Estoque extends Model
     @JoinColumn(name = "codigo_tecnico")
     private Tecnico    tecnico;
     private String     notaFiscal;
+    
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate  emissaoNotaFiscal;
+    
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate  chegadaNotaFiscal;
     private String     modelo;
     private BigDecimal valor;
@@ -71,8 +74,8 @@ public class Estoque extends Model
     @JoinColumn(name = "agendado_por")
     private Usuario agendadoPor;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    private LocalDateTime agendadoPara;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate agendadoPara;
 
     @JsonIgnoreProperties("estoque")
     @OneToMany(mappedBy = "estoque", targetEntity = EstoqueObservacao.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -157,7 +160,7 @@ public class Estoque extends Model
         return agendadoPor;
     }
 
-    public LocalDateTime getAgendadoPara( )
+    public LocalDate getAgendadoPara( )
     {
         return agendadoPara;
     }
@@ -237,7 +240,7 @@ public class Estoque extends Model
         this.agendadoPor = agendadoPor;
     }
 
-    public void setAgendadoPara( LocalDateTime agendadoPara )
+    public void setAgendadoPara( LocalDate agendadoPara )
     {
         this.agendadoPara = agendadoPara;
     }

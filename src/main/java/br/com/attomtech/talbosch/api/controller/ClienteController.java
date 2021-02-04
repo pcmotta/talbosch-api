@@ -1,5 +1,7 @@
 package br.com.attomtech.talbosch.api.controller;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.IntStream;
 
 import javax.validation.Valid;
@@ -23,7 +25,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.attomtech.talbosch.api.controller.interfaces.NegocioControllerAuditoria;
+import br.com.attomtech.talbosch.api.dto.ClienteDTO;
 import br.com.attomtech.talbosch.api.model.Cliente;
+import br.com.attomtech.talbosch.api.model.ClienteEndereco;
+import br.com.attomtech.talbosch.api.model.ClienteProduto;
 import br.com.attomtech.talbosch.api.model.enums.Genero;
 import br.com.attomtech.talbosch.api.model.enums.TipoCliente;
 import br.com.attomtech.talbosch.api.model.enums.TipoPessoa;
@@ -42,7 +47,7 @@ public class ClienteController implements NegocioControllerAuditoria<Cliente, Cl
     
     @Override
     @GetMapping
-    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('CLIENTE')")
+    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('CLIENTES')")
     public ResponseEntity<Page<Cliente>> pesquisar( ClienteFilter filtro, Pageable pageable )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -55,7 +60,7 @@ public class ClienteController implements NegocioControllerAuditoria<Cliente, Cl
     
     @Override
     @PostMapping
-    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('CLIENTE')")
+    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('CLIENTES')")
     public ResponseEntity<Cliente> cadastrar( @RequestBody @Valid Cliente cliente, Authentication auth )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -68,7 +73,7 @@ public class ClienteController implements NegocioControllerAuditoria<Cliente, Cl
     
     @Override
     @PutMapping
-    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('CLIENTE')")
+    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('CLIENTES')")
     public ResponseEntity<Cliente> atualizar( @RequestBody @Valid Cliente cliente, Authentication auth )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -81,7 +86,7 @@ public class ClienteController implements NegocioControllerAuditoria<Cliente, Cl
     
     @Override
     @DeleteMapping("/{codigo}")
-    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('CLIENTE')")
+    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('CLIENTES')")
     public ResponseEntity<Void> excluir( @PathVariable Long codigo, Authentication auth )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -93,7 +98,7 @@ public class ClienteController implements NegocioControllerAuditoria<Cliente, Cl
     }
     
     @GetMapping("/{codigo}")
-    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('CLIENTE')")
+    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('CLIENTES')")
     public ResponseEntity<Cliente> buscarPorCodigo( @PathVariable Long codigo )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -104,8 +109,32 @@ public class ClienteController implements NegocioControllerAuditoria<Cliente, Cl
         return ResponseEntity.ok( cliente );
     }
     
+    @GetMapping("/{codigo}/enderecos")
+    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('ORDEMSERVICO')")
+    public ResponseEntity<List<ClienteEndereco>> buscarEnderecos( @PathVariable Long codigo )
+    {
+        if( LOGGER.isDebugEnabled( ) )
+            LOGGER.debug( "Buscando Endereços por Código > {}", codigo );
+
+        Cliente cliente = service.buscarPorCodigo( codigo );
+        
+        return ResponseEntity.ok( cliente.getEnderecos( ) );
+    }
+    
+    @GetMapping("/{codigo}/produtos")
+    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('ORDEMSERVICO')")
+    public ResponseEntity<List<ClienteProduto>> buscarProdutos( @PathVariable Long codigo )
+    {
+        if( LOGGER.isDebugEnabled( ) )
+            LOGGER.debug( "Buscando Endereços por Código > {}", codigo );
+
+        Cliente cliente = service.buscarPorCodigo( codigo );
+        
+        return ResponseEntity.ok( cliente.getProdutos( ) );
+    }
+    
     @GetMapping("/tipos-pessoa")
-    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('CLIENTE')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<LabelValue[]> buscarTiposPessoa( )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -121,7 +150,7 @@ public class ClienteController implements NegocioControllerAuditoria<Cliente, Cl
     }
     
     @GetMapping("/tipos-cliente")
-    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('CLIENTE')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<LabelValue[]> buscarTiposCliente( )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -137,7 +166,7 @@ public class ClienteController implements NegocioControllerAuditoria<Cliente, Cl
     }
     
     @GetMapping("/generos")
-    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('CLIENTE')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<LabelValue[]> buscarGeneros( )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -150,5 +179,20 @@ public class ClienteController implements NegocioControllerAuditoria<Cliente, Cl
             values[index] = new LabelValue( generos[index].toString( ), generos[index].getDescricao( ) ) );
         
         return ResponseEntity.ok( values );
+    }
+    
+    @GetMapping("/todos")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<ClienteDTO>> buscarClientes( )
+    {
+        if( LOGGER.isDebugEnabled( ) )
+            LOGGER.debug( "Buscando Clientes" );
+        
+        List<Cliente> clientes = service.buscarTodosClientes( );
+        List<ClienteDTO> resultado = new ArrayList<ClienteDTO>( );
+        
+        clientes.forEach( cliente -> resultado.add( new ClienteDTO( cliente ) ) );
+        
+        return ResponseEntity.ok( resultado );
     }
 }

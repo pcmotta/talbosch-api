@@ -3,14 +3,14 @@ package br.com.attomtech.talbosch.api.model;
 import java.math.BigDecimal;
 import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.Table;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -48,8 +48,10 @@ public class Peca extends Model
     private Fabricante fabricante;
     private boolean    ativo = true;
     
-    @OneToMany(mappedBy = "id.peca", targetEntity = Modelo.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Modelo> modelos;
+    @ElementCollection(targetClass = String.class)
+    @JoinTable(name = "modelo", joinColumns = @JoinColumn(name = "codigo_peca"))
+    @Column(name = "modelo", nullable = false)
+    private List<String> modelos;
 
     public String getCodigo( )
     {
@@ -137,12 +139,12 @@ public class Peca extends Model
         this.ativo = ativo;
     }
 
-    public List<Modelo> getModelos( )
+    public List<String> getModelos( )
     {
         return modelos;
     }
 
-    public void setModelos( List<Modelo> modelos )
+    public void setModelos( List<String> modelos )
     {
         this.modelos = modelos;
     }

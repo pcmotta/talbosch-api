@@ -1,5 +1,6 @@
 package br.com.attomtech.talbosch.api.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -37,6 +38,13 @@ public class TecnicoService implements NegocioService<Tecnico, TecnicoFilter, Lo
         Page<Tecnico> pagina = repository.pesquisar( filtro, pageable );
         
         return pagina;
+    }
+    
+    public List<Tecnico> buscarAtivos( )
+    {
+        List<Tecnico> tecnicos = repository.findByAtivoTrue( );
+        
+        return tecnicos;
     }
     
     @Override

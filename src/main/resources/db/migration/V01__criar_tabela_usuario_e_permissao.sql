@@ -17,9 +17,9 @@ CREATE TABLE usuario (
 INSERT INTO usuario (nome, login, senha) VALUES ('Administrador', 'admin', '$2a$10$X607ZPhQ4EgGNaYKt3n4SONjIv9zc.VMWdEuhCuba7oLAL5IvcL5.');
 
 CREATE TABLE usuario_permissao (
-	codigo BIGINT(20) PRIMARY KEY AUTO_INCREMENT,
 	codigo_usuario BIGINT(20) NOT NULL,
 	permissao VARCHAR(20) NOT NULL,
+	CONSTRAINT PK_usuario_permissao PRIMARY KEY (codigo_usuario, permissao),
 	CONSTRAINT FK_usuario_permissao_codigo_usuario FOREIGN KEY (codigo_usuario) REFERENCES usuario(codigo) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
