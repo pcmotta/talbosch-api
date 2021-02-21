@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -22,13 +23,14 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import br.com.attomtech.talbosch.api.exception.NegocioException;
 import br.com.attomtech.talbosch.api.model.abstracts.Model;
 import br.com.attomtech.talbosch.api.model.enums.StatusEstoque;
 import br.com.attomtech.talbosch.api.model.enums.TipoEstoque;
 
 @Table(name = "estoque")
 @Entity
-public class Estoque extends Model
+public class Estoque extends Model implements Cloneable
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,19 +48,16 @@ public class Estoque extends Model
     @ManyToOne
     @JoinColumn(name = "ordem_servico")
     private OrdemServico ordemServico;
-    private String       rnm;
-    private String       pedido;
+    private String       rnn;
+    
+    @JsonIgnoreProperties("pecas")
+    @ManyToOne
+    @JoinColumn(name = "pedido")
+    private Pedido pedido;
 
     @ManyToOne
     @JoinColumn(name = "codigo_tecnico")
     private Tecnico    tecnico;
-    private String     notaFiscal;
-    
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate  emissaoNotaFiscal;
-    
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate  chegadaNotaFiscal;
     private String     modelo;
     private BigDecimal valor;
 
@@ -85,6 +84,24 @@ public class Estoque extends Model
     @OneToMany(mappedBy = "estoque", targetEntity = EstoqueTelefone.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EstoqueTelefone> telefones = new ArrayList<EstoqueTelefone>( );
 
+    @Override
+    public Estoque clone( ) throws NegocioException
+    {
+        Estoque estoque = null;
+        try
+        {
+            estoque = (Estoque)super.clone( );
+            estoque.setObservacoes( getObservacoes( ).stream( ).map( o -> o.clone( ) ).collect( Collectors.toList( ) ) );
+            estoque.setTelefones( getTelefones( ).stream( ).map( t -> t.clone( ) ).collect( Collectors.toList( ) ) );
+        }
+        catch( CloneNotSupportedException e )
+        {
+            throw new NegocioException( "Erro ao clonar estoque" );
+        }
+        
+        return estoque;
+    }
+    
     public Long getCodigo( )
     {
         return codigo;
@@ -105,12 +122,12 @@ public class Estoque extends Model
         return ordemServico;
     }
 
-    public String getRnm( )
+    public String getRnn( )
     {
-        return rnm;
+        return rnn;
     }
 
-    public String getPedido( )
+    public Pedido getPedido( )
     {
         return pedido;
     }
@@ -118,21 +135,6 @@ public class Estoque extends Model
     public Tecnico getTecnico( )
     {
         return tecnico;
-    }
-
-    public String getNotaFiscal( )
-    {
-        return notaFiscal;
-    }
-
-    public LocalDate getEmissaoNotaFiscal( )
-    {
-        return emissaoNotaFiscal;
-    }
-
-    public LocalDate getChegadaNotaFiscal( )
-    {
-        return chegadaNotaFiscal;
     }
 
     public String getModelo( )
@@ -185,12 +187,12 @@ public class Estoque extends Model
         this.ordemServico = ordemServico;
     }
 
-    public void setRnm( String rnm )
+    public void setRnn( String rnn )
     {
-        this.rnm = rnm;
+        this.rnn = rnn;
     }
 
-    public void setPedido( String pedido )
+    public void setPedido( Pedido pedido )
     {
         this.pedido = pedido;
     }
@@ -198,21 +200,6 @@ public class Estoque extends Model
     public void setTecnico( Tecnico tecnico )
     {
         this.tecnico = tecnico;
-    }
-
-    public void setNotaFiscal( String notaFiscal )
-    {
-        this.notaFiscal = notaFiscal;
-    }
-
-    public void setEmissaoNotaFiscal( LocalDate emissaoNotaFiscal )
-    {
-        this.emissaoNotaFiscal = emissaoNotaFiscal;
-    }
-
-    public void setChegadaNotaFiscal( LocalDate chegadaNotaFiscal )
-    {
-        this.chegadaNotaFiscal = chegadaNotaFiscal;
     }
 
     public void setModelo( String modelo )
@@ -298,9 +285,8 @@ public class Estoque extends Model
     public String toString( )
     {
         return "Estoque [codigo=" + codigo + ", peca=" + peca + ", cliente=" + cliente + ", ordemServico="
-                + ordemServico + ", rnm=" + rnm + ", pedido=" + pedido + ", tecnico=" + tecnico + ", notaFiscal="
-                + notaFiscal + ", emissaoNotaFiscal=" + emissaoNotaFiscal + ", chegadaNotaFiscal=" + chegadaNotaFiscal
-                + ", modelo=" + modelo + ", valor=" + valor + ", tipo=" + tipo + ", status=" + status + ", agendadoPor="
+                + ordemServico + ", rnn=" + rnn + ", pedido=" + pedido + ", tecnico=" + tecnico + ", modelo=" + modelo 
+                + ", valor=" + valor + ", tipo=" + tipo + ", status=" + status + ", agendadoPor="
                 + agendadoPor + ", agendadoEm=" + agendadoPara + ", observacoes=" + observacoes + ", telefones="
                 + telefones + "]";
     }

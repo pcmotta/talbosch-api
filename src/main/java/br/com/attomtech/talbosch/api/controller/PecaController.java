@@ -1,7 +1,6 @@
 package br.com.attomtech.talbosch.api.controller;
 
 import java.util.List;
-import java.util.stream.IntStream;
 
 import javax.validation.Valid;
 
@@ -26,8 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.attomtech.talbosch.api.controller.interfaces.NegocioControllerAuditoria;
 import br.com.attomtech.talbosch.api.dto.PecaDTO;
 import br.com.attomtech.talbosch.api.model.Peca;
-import br.com.attomtech.talbosch.api.model.enums.Aparelho;
-import br.com.attomtech.talbosch.api.model.enums.Fabricante;
 import br.com.attomtech.talbosch.api.repository.filter.PecaFilter;
 import br.com.attomtech.talbosch.api.service.PecaService;
 import br.com.attomtech.talbosch.api.utils.LabelValue;
@@ -113,11 +110,7 @@ public class PecaController implements NegocioControllerAuditoria<Peca, PecaFilt
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Buscando Aparelhos" );
         
-        Aparelho[] aparelhos = Aparelho.values( );
-        LabelValue[] values = new LabelValue[aparelhos.length];
-        
-        IntStream.range( 0, aparelhos.length ).forEach( index -> 
-            values[index] = new LabelValue( aparelhos[index].toString( ), aparelhos[index].getDescricao( ) ) );
+        LabelValue[] values = service.buscarAparelhos( );
         
         return ResponseEntity.ok( values );
     }
@@ -129,11 +122,7 @@ public class PecaController implements NegocioControllerAuditoria<Peca, PecaFilt
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Buscando Fabricantes" );
         
-        Fabricante[] fabricantes = Fabricante.values( );
-        LabelValue[] values = new LabelValue[fabricantes.length];
-        
-        IntStream.range( 0, fabricantes.length ).forEach( index -> 
-            values[index] = new LabelValue( fabricantes[index].toString( ), fabricantes[index].getNome( ) ) );
+        LabelValue[] values = service.buscarFabricantes( );
         
         return ResponseEntity.ok( values );
     }

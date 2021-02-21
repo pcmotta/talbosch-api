@@ -1,14 +1,13 @@
 package br.com.attomtech.talbosch.api.controller;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.IntStream;
 
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -29,9 +28,6 @@ import br.com.attomtech.talbosch.api.dto.ClienteDTO;
 import br.com.attomtech.talbosch.api.model.Cliente;
 import br.com.attomtech.talbosch.api.model.ClienteEndereco;
 import br.com.attomtech.talbosch.api.model.ClienteProduto;
-import br.com.attomtech.talbosch.api.model.enums.Genero;
-import br.com.attomtech.talbosch.api.model.enums.TipoCliente;
-import br.com.attomtech.talbosch.api.model.enums.TipoPessoa;
 import br.com.attomtech.talbosch.api.repository.filter.ClienteFilter;
 import br.com.attomtech.talbosch.api.service.ClienteService;
 import br.com.attomtech.talbosch.api.utils.LabelValue;
@@ -140,11 +136,7 @@ public class ClienteController implements NegocioControllerAuditoria<Cliente, Cl
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Buscando Tipos Pessoa" );
         
-        TipoPessoa[] tipos = TipoPessoa.values( );
-        LabelValue[] values = new LabelValue[tipos.length];
-        
-        IntStream.range( 0, tipos.length ).forEach( index ->
-            values[index] = new LabelValue( tipos[index].toString( ), tipos[index].getDescricao( ) ) );
+        LabelValue[] values = service.buscarTiposPessoa( );
         
         return ResponseEntity.ok( values );
     }
@@ -156,15 +148,12 @@ public class ClienteController implements NegocioControllerAuditoria<Cliente, Cl
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Buscando Tipos Cliente" );
         
-        TipoCliente[] tipos = TipoCliente.values( );
-        LabelValue[] values = new LabelValue[tipos.length];
-        
-        IntStream.range( 0, tipos.length ).forEach( index ->
-            values[index] = new LabelValue( tipos[index].toString( ), tipos[index].getDescricao( ) ) );
+        LabelValue[] values = service.buscarTiposCliente( );
         
         return ResponseEntity.ok( values );
     }
     
+    @Cacheable(value = "generos")
     @GetMapping("/generos")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<LabelValue[]> buscarGeneros( )
@@ -172,11 +161,7 @@ public class ClienteController implements NegocioControllerAuditoria<Cliente, Cl
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Buscando Gêneros" );
         
-        Genero[] generos = Genero.values( );
-        LabelValue[] values = new LabelValue[generos.length];
-        
-        IntStream.range( 0, generos.length ).forEach( index ->
-            values[index] = new LabelValue( generos[index].toString( ), generos[index].getDescricao( ) ) );
+        LabelValue[] values = service.buscarGeneros( );
         
         return ResponseEntity.ok( values );
     }
@@ -188,11 +173,8 @@ public class ClienteController implements NegocioControllerAuditoria<Cliente, Cl
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Buscando Clientes" );
         
-        List<Cliente> clientes = service.buscarTodosClientes( );
-        List<ClienteDTO> resultado = new ArrayList<ClienteDTO>( );
+        List<ClienteDTO> clientes = service.buscarTodosClientes( );
         
-        clientes.forEach( cliente -> resultado.add( new ClienteDTO( cliente ) ) );
-        
-        return ResponseEntity.ok( resultado );
+        return ResponseEntity.ok( clientes );
     }
 }

@@ -1,9 +1,13 @@
 package br.com.attomtech.talbosch.api.repository.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaBuilder.In;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -13,6 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.util.StringUtils;
 
 import br.com.attomtech.talbosch.api.model.Estoque;
+import br.com.attomtech.talbosch.api.model.enums.TipoEstoque;
+import br.com.attomtech.talbosch.api.reports.EstoqueTecnicoReport;
 import br.com.attomtech.talbosch.api.repository.filter.EstoqueFilter;
 import br.com.attomtech.talbosch.api.repository.query.EstoqueRepositoryQuery;
 
@@ -21,7 +27,7 @@ public class EstoqueRepositoryImpl extends RepositoryImpl<EstoqueFilter, Estoque
     @Override
     public Page<Estoque> pesquisar( EstoqueFilter filtro, Pageable pageable )
     {
-        return pesquisarDados( filtro, pageable );
+        return pesquisarDados( filtro, pageable, "agendadoPara", false );
     }
 
     @Override
@@ -65,6 +71,55 @@ public class EstoqueRepositoryImpl extends RepositoryImpl<EstoqueFilter, Estoque
         if( filtro.getAgendadoParaAte( ) != null )
             predicates.add( builder.lessThanOrEqualTo( from.get( EstoqueFilter.AGENDADOPARA ), filtro.getAgendadoParaAte( ) ) );
         
+        if( isNotNull( filtro.getPedido( ) ) )
+        {
+            Join<Object, Object> pedido = from.join( EstoqueFilter.PEDIDO );
+            predicates.add( builder.equal( pedido.get( EstoqueFilter.PEDIDO ), filtro.getPedido( ) ) );
+        }
+        
         return predicates.toArray( new Predicate[predicates.size( )] );
+    }
+
+    @Override
+    public List<Estoque> buscarEstoqueTecnico( EstoqueTecnicoReport filtro )
+    {
+        CriteriaBuilder builder = getCriteriaBuilder( );
+        CriteriaQuery<Estoque> query = getCriteriaQuery( builder );
+        Root<Estoque> from = getRoot( query );
+        
+        List<Predicate> predicates = new ArrayList<Predicate>( );
+        
+        predicates.add( builder.equal( from.get( "agendadoPara" ), filtro.getData( ) ) );
+        
+        List<TipoEstoque> tipos = new ArrayList<>( );
+        
+        if( filtro.isTodos( ) )
+            tipos.addAll( Arrays.asList( TipoEstoque.values( ) ) );
+        else
+        {
+            if( filtro.isGarantia( ) )
+                tipos.add( TipoEstoque.GARANTIA );
+            
+            if( filtro.isForaGarantia( ) )
+                tipos.add( TipoEstoque.FORAGARANTIA );
+            
+            if( filtro.isBuffer( ) )
+                tipos.add( TipoEstoque.BUFFER );
+        }
+        
+        In<TipoEstoque> tipoIn = builder.in( from.get( "tipo" ) );
+        tipos.forEach( t -> tipoIn.value( t ) );
+        
+        predicates.add( tipoIn );
+        
+        if( filtro.getTecnico( ) != null )
+            predicates.add( builder.equal( from.get( "tecnico" ), filtro.getTecnico( ) ) );
+        else
+            predicates.add( builder.isNotNull( from.get( "tecnico" ) ) );
+        
+        query.where( predicates.toArray( new Predicate[predicates.size( )] ) );
+        TypedQuery<Estoque> typed = manager.createQuery( query );
+        
+        return typed.getResultList( );
     }
 }

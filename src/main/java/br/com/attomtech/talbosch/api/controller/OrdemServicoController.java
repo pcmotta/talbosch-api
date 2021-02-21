@@ -1,6 +1,6 @@
 package br.com.attomtech.talbosch.api.controller;
 
-import java.util.stream.IntStream;
+import java.util.List;
 
 import javax.validation.Valid;
 
@@ -9,7 +9,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -24,9 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.attomtech.talbosch.api.controller.interfaces.NegocioControllerAuditoria;
 import br.com.attomtech.talbosch.api.model.OrdemServico;
-import br.com.attomtech.talbosch.api.model.enums.StatusOrdem;
-import br.com.attomtech.talbosch.api.model.enums.TipoOrdem;
-import br.com.attomtech.talbosch.api.model.enums.TipoOrdemValor;
 import br.com.attomtech.talbosch.api.repository.filter.OrdemServicoFilter;
 import br.com.attomtech.talbosch.api.service.OrdemServicoService;
 import br.com.attomtech.talbosch.api.utils.LabelValue;
@@ -105,23 +104,33 @@ public class OrdemServicoController implements NegocioControllerAuditoria<OrdemS
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Excluindo > {}", numero );
         
-        service.excluir( numero, null );
+        service.excluir( numero, auth.getName( ) );
         
         return ResponseEntity.noContent( ).build( );
     }
     
+    @GetMapping("/{numero}/pdf")
+    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('ORDEMSERVICO')")
+    public ResponseEntity<byte[]> gerarPdf( @PathVariable Long numero )
+    {
+        if( LOGGER.isDebugEnabled( ) )
+            LOGGER.debug( "Gerando PDF > {}", numero );
+        
+        byte[] pdf = service.gerarRelatorio( numero );
+        
+        return ResponseEntity.ok( )
+                .header( HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_PDF_VALUE )
+                .body( pdf );
+    }
+    
     @GetMapping("/status")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<LabelValue[]> buscarStatus( )
+    public ResponseEntity<List<LabelValue>> buscarStatus( )
     {
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Buscando Status" );
 
-        StatusOrdem[] status     = StatusOrdem.values( );
-        LabelValue[]  labelValue = new LabelValue[status.length];
-        
-        IntStream.range( 0, status.length ).forEach( index ->
-                labelValue[index] = new LabelValue( status[index], status[index].getDescricao( ) ) );
+        List<LabelValue> labelValue = service.buscarStatus( );
         
         return ResponseEntity.ok( labelValue );
     }
@@ -133,11 +142,7 @@ public class OrdemServicoController implements NegocioControllerAuditoria<OrdemS
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Buscando Tipos" );
 
-        TipoOrdem[]  tipos      = TipoOrdem.values( );
-        LabelValue[] labelValue = new LabelValue[tipos.length];
-        
-        IntStream.range( 0, tipos.length ).forEach( index ->
-                labelValue[index] = new LabelValue( tipos[index], tipos[index].getDescricao( ) ) );
+        LabelValue[] labelValue = service.buscarTipos( );
         
         return ResponseEntity.ok( labelValue );
     }
@@ -149,11 +154,7 @@ public class OrdemServicoController implements NegocioControllerAuditoria<OrdemS
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Buscando Tipos Valor" );
 
-        TipoOrdemValor[] tipos      = TipoOrdemValor.values( );
-        LabelValue[]     labelValue = new LabelValue[tipos.length];
-        
-        IntStream.range( 0, tipos.length ).forEach( index ->
-                labelValue[index] = new LabelValue( tipos[index], tipos[index].getDescricao( ) ) );
+        LabelValue[] labelValue = service.buscarTiposValor( );
         
         return ResponseEntity.ok( labelValue );
     }

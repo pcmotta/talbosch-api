@@ -2,6 +2,8 @@ package br.com.attomtech.talbosch.api.repository.filter;
 
 import java.time.LocalDate;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import br.com.attomtech.talbosch.api.model.Usuario;
 
 public class MensagemFilter
@@ -17,7 +19,11 @@ public class MensagemFilter
     private Usuario   usuarioLogado;
     private Usuario   usuarioOrigem;
     private Usuario   usuarioDestino;
+    
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate dataDe;
+    
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate dataAte;
     private Boolean   lido;
 

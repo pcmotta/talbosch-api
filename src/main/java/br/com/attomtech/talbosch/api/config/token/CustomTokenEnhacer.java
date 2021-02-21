@@ -24,7 +24,8 @@ public class CustomTokenEnhacer implements TokenEnhancer
         addInfo.put( "codigo",     usuarioSistema.getUsuario( ).getCodigo( ) );
         addInfo.put( "nome",       usuarioSistema.getUsuario( ).getNome( )   );
         addInfo.put( "login",      usuarioSistema.getUsuario( ).getLogin( )  );
-        addInfo.put( "permissoes", permissoes );
+        addInfo.put( "permissoes", permissoes                                );
+        addInfo.put( "mensagens",  usuarioSistema.getMensagens( )            );
 
         ((DefaultOAuth2AccessToken)accessToken).setAdditionalInformation( addInfo );
         

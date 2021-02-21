@@ -14,9 +14,11 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import br.com.attomtech.talbosch.api.exception.NegocioException;
+
 @Table(name = "ordem_servico_andamento")
 @Entity
-public class OrdemAndamento
+public class OrdemAndamento implements Cloneable
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,6 +40,22 @@ public class OrdemAndamento
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     @NotNull(message = "Data do Andamento é obrigatório")
     private LocalDateTime data;
+    
+    @Override
+    public OrdemAndamento clone( ) throws NegocioException
+    {
+        OrdemAndamento andamento = null;
+        try
+        {
+            andamento = (OrdemAndamento)super.clone( );
+        }
+        catch( CloneNotSupportedException e )
+        {
+            throw new NegocioException( "Erro ao clonar andamento de ordem de serviço" );
+        }
+        
+        return andamento;
+    }
 
     public Long getCodigo( )
     {

@@ -13,11 +13,12 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+import br.com.attomtech.talbosch.api.exception.NegocioException;
 import br.com.attomtech.talbosch.api.model.enums.TipoOrdemValor;
 
 @Table(name = "ordem_servico_valor")
 @Entity
-public class OrdemValor
+public class OrdemValor implements Cloneable
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,6 +34,22 @@ public class OrdemValor
     
     @NotNull(message = "Valor é obrigatório")
     private BigDecimal valor;
+    
+    @Override
+    public OrdemValor clone( ) throws NegocioException
+    {
+        OrdemValor valor = null;
+        try
+        {
+            valor = (OrdemValor)super.clone( );
+        }
+        catch( CloneNotSupportedException e )
+        {
+            throw new NegocioException( "Erro ao clonar valor de ordem de serviço" );
+        }
+        
+        return valor;
+    }
 
     public Long getCodigo( )
     {

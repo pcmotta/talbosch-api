@@ -7,9 +7,12 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+import br.com.attomtech.talbosch.api.exception.NegocioException;
+import br.com.attomtech.talbosch.api.model.abstracts.Model;
+
 @Table(name = "tecnico")
 @Entity
-public class Tecnico
+public class Tecnico extends Model implements Cloneable
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,6 +21,22 @@ public class Tecnico
     @NotNull(message = "O Nome é obrigatório")
     private String  nome;
     private boolean ativo;
+    
+    @Override
+    public Tecnico clone( ) throws NegocioException
+    {
+        Tecnico tecnico = null;
+        try
+        {
+            tecnico = (Tecnico)super.clone( );
+        }
+        catch( CloneNotSupportedException e )
+        {
+            throw new NegocioException( "Erro ao clonar técnico" );
+        }
+        
+        return tecnico;
+    }
 
     public Long getCodigo( )
     {

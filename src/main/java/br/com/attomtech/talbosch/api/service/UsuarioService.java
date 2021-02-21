@@ -1,35 +1,49 @@
 package br.com.attomtech.talbosch.api.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import br.com.attomtech.talbosch.api.dto.UsuarioDTO;
 import br.com.attomtech.talbosch.api.exception.NegocioException;
+import br.com.attomtech.talbosch.api.log.UsuarioLog;
 import br.com.attomtech.talbosch.api.model.Usuario;
+import br.com.attomtech.talbosch.api.model.enums.AcaoLog;
+import br.com.attomtech.talbosch.api.model.enums.Permissao;
 import br.com.attomtech.talbosch.api.repository.UsuarioRepository;
 import br.com.attomtech.talbosch.api.repository.filter.UsuarioFilter;
 import br.com.attomtech.talbosch.api.service.interfaces.NegocioServiceAuditoria;
+import br.com.attomtech.talbosch.api.utils.LabelValue;
 
 @Service
-public class UsuarioService implements NegocioServiceAuditoria<Usuario, UsuarioFilter, Long>
+public class UsuarioService extends AuditoriaService<Usuario> implements NegocioServiceAuditoria<Usuario, UsuarioFilter, Long>
 {
     private static final Logger LOGGER = LoggerFactory.getLogger( UsuarioService.class );
     
-    @Autowired
     private UsuarioRepository repository;
-    
-    @Autowired
+    private UsuarioLog usuarioLog;
     private PasswordEncoder passwordEncoder;
+    
+    public UsuarioService( UsuarioRepository repository, UsuarioLog log, PasswordEncoder encoder )
+    {
+        this.repository = repository;
+        this.usuarioLog = log;
+        this.passwordEncoder = encoder;
+    }
     
     @Override
     public Page<Usuario> pesquisar( UsuarioFilter filtro, Pageable pageable )
@@ -58,15 +72,16 @@ public class UsuarioService implements NegocioServiceAuditoria<Usuario, UsuarioF
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Cadastrando > {}", usuario );
         
-        Usuario usuarioLogado = buscarPorLogin( login );
-        
-        usuario.getAuditoria( ).setIncluidoPor( usuarioLogado );
-        usuario.getAuditoria( ).setIncluidoEm( LocalDateTime.now( ) );
+        atualizarAuditoriaInclusao( usuario, login );
         usuario.setSenha( passwordEncoder.encode( usuario.getSenha( ) ) );
         
-        return salvar( usuario );
+        Usuario usuarioSalvo = salvar( usuario );
+        usuarioLog.logar( AcaoLog.CADASTRO, usuarioSalvo.getCodigo( ), usuarioSalvo );
+        
+        return usuarioSalvo;
     }
     
+    @Caching(evict = { @CacheEvict(value = "usuario", key = "#usuario.codigo"), @CacheEvict(value = "usuariosAtivos", allEntries = true) })
     @Override
     public Usuario atualizar( Usuario usuario, String login )
     {
@@ -76,21 +91,49 @@ public class UsuarioService implements NegocioServiceAuditoria<Usuario, UsuarioF
         if( usuario.isNovo( ) )
             throw new NegocioException( "Usuário não fornecido" );
         
-        Usuario usuarioSalvo = buscarPorCodigo( usuario.getCodigo( ) );
+        Usuario usuarioSalvo = buscarPorCodigo( usuario.getCodigo( ) ).clone( );
         
         if( StringUtils.hasText( usuario.getSenha( ) ) )
             usuario.setSenha( passwordEncoder.encode( usuario.getSenha( ) ) );
         else
             usuario.setSenha( usuarioSalvo.getSenha( ) );
         
-        Usuario usuarioLogado = buscarPorLogin( login );
+        atualizarAuditoriaAlteracao( usuarioSalvo, login );
         usuario.setAuditoria( usuarioSalvo.getAuditoria( ) );
-        usuario.getAuditoria( ).setAlteradoPor( usuarioLogado );
-        usuario.getAuditoria( ).setAlteradoEm( LocalDateTime.now( ) );
+        usuario.setUltimoAcesso( usuarioSalvo.getUltimoAcesso( ) );
         
-        return salvar( usuario ); 
+        usuario = salvar( usuario ); 
+        usuarioLog.logar( AcaoLog.ALTERACAO, usuarioSalvo.getCodigo( ), usuarioSalvo, usuario );
+        
+        return usuario;
     }
     
+    public Usuario atualizarProprioUsuario( Usuario usuario, String login )
+    {
+        if( LOGGER.isDebugEnabled( ) )
+            LOGGER.debug( "Atualizando Próprio Usuário > {}", usuario );
+        
+        Usuario usuarioSalvo = buscarPorLogin( login ).clone( );
+        
+        usuario.setCodigo( usuarioSalvo.getCodigo( ) );
+        usuario.setPermissoes( usuarioSalvo.getPermissoes( ) );
+        usuario.setAtivo( usuarioSalvo.isAtivo( ) );
+        
+        if( StringUtils.hasText( usuario.getSenha( ) ) )
+            usuario.setSenha( passwordEncoder.encode( usuario.getSenha( ) ) );
+        else
+            usuario.setSenha( usuarioSalvo.getSenha( ) );
+        
+        atualizarAuditoriaAlteracao( usuarioSalvo, login );
+        usuario.setAuditoria( usuarioSalvo.getAuditoria( ) );
+        
+        usuario = salvar( usuario );
+        usuarioLog.logar( AcaoLog.ALTERACAO, usuario.getCodigo( ), usuarioSalvo, usuario );
+        
+        return usuario;
+    }
+    
+    @Caching(evict = { @CacheEvict(value = "usuario", key = "#codigo"), @CacheEvict(value = "usuariosAtivos", allEntries = true) })
     @Override
     public void excluir( Long codigo, String login )
     {
@@ -105,8 +148,10 @@ public class UsuarioService implements NegocioServiceAuditoria<Usuario, UsuarioF
         usuario.setAtivo( false );
         
         salvar( usuario );
+        usuarioLog.logar( AcaoLog.EXCLUSAO, codigo, usuario );
     }
     
+    @Cacheable(value = "usuario", key = "#codigo")
     @Override
     public Usuario buscarPorCodigo( Long codigo )
     {
@@ -134,5 +179,49 @@ public class UsuarioService implements NegocioServiceAuditoria<Usuario, UsuarioF
         Optional<Usuario> usuarioOpt = repository.findByLoginAndAtivoTrue( login );
         
         return usuarioOpt.orElseThrow( ( ) -> new NegocioException( "Usuário não encontrado" ) );
+    }
+    
+    @Cacheable(value = "usuariosAtivos")
+    public List<UsuarioDTO> buscarAtivos( )
+    {
+        if( LOGGER.isDebugEnabled( ) )
+            LOGGER.debug( "Buscando usuários" );
+        
+        List<Usuario> usuariosAtivos = buscarUsuarios( );
+        List<UsuarioDTO> usuarios = new ArrayList<UsuarioDTO>( );
+        
+        usuariosAtivos.forEach( usuario -> 
+            usuarios.add( new UsuarioDTO( usuario ) ) );
+        
+        return usuarios;
+    }
+    
+    @Cacheable(value = "permissoes", key = "#login")
+    public LabelValue[] buscarPermissoes( String login )
+    {
+        if( LOGGER.isDebugEnabled( ) )
+            LOGGER.debug( "Buscando Permissões" );
+
+        Usuario usuario = buscarPorLogin( login );
+        Permissao[] permissoes;
+        
+        if( usuario.isAdministrador( ) )
+            permissoes = Permissao.values( );
+        else
+            permissoes = usuario.getPermissoes( ).stream( ).toArray( size -> new Permissao[size] );
+        
+        LabelValue[] values = new LabelValue[permissoes.length];
+        IntStream.range( 0, permissoes.length ).forEach( index ->
+                values[index] = new LabelValue( permissoes[index], permissoes[index].getDescricao( ) ) );
+        
+        return values;
+    }
+    
+    public List<Usuario> buscarUsuariosParaNotificarEstoque( )
+    {
+        if( LOGGER.isDebugEnabled( ) )
+            LOGGER.debug( "Buscando Usuários para notificar estoque" );
+        
+        return repository.usuariosParaNotificarEstoque( );
     }
 }

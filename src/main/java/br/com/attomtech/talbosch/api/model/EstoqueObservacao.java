@@ -13,9 +13,11 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import br.com.attomtech.talbosch.api.exception.NegocioException;
+
 @Table(name = "estoque_observacao")
 @Entity
-public class EstoqueObservacao
+public class EstoqueObservacao implements Cloneable
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,6 +40,22 @@ public class EstoqueObservacao
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime data;
 
+    @Override
+    public EstoqueObservacao clone( ) throws NegocioException
+    {
+        EstoqueObservacao obs = null;
+        try
+        {
+            obs = (EstoqueObservacao)super.clone( );
+        }
+        catch( CloneNotSupportedException e )
+        {
+            throw new NegocioException( "Erro ao clonar observação de estoque" );
+        }
+        
+        return obs;
+    }
+    
     public Long getCodigo( )
     {
         return codigo;

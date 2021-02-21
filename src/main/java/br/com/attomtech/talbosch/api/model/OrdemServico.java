@@ -1,8 +1,8 @@
 package br.com.attomtech.talbosch.api.model;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -17,19 +17,21 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import br.com.attomtech.talbosch.api.exception.NegocioException;
 import br.com.attomtech.talbosch.api.model.abstracts.Model;
 import br.com.attomtech.talbosch.api.model.enums.StatusOrdem;
 import br.com.attomtech.talbosch.api.model.enums.TipoOrdem;
 
 @Table(name = "ordem_servico")
 @Entity
-public class OrdemServico extends Model
+public class OrdemServico extends Model implements Cloneable
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,8 +43,6 @@ public class OrdemServico extends Model
     @ManyToOne
     @JoinColumn(name = "codigo_cliente")
     private Cliente cliente;
-
-    private String rnm;
 
     @Enumerated(EnumType.STRING)
     private TipoOrdem tipo;
@@ -56,8 +56,8 @@ public class OrdemServico extends Model
     private String  observacao;
     private String  baixa;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    private LocalDateTime dataBaixa;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate dataBaixa;
 
     @JsonIgnoreProperties(value = { "ativo" })
     @ManyToOne
@@ -80,10 +80,18 @@ public class OrdemServico extends Model
     @JsonIgnoreProperties("ordem")
     @OneToMany(mappedBy = "ordem", targetEntity = OrdemValor.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrdemValor> valores;
+    
+    @JsonIgnoreProperties("ordem")
+    @OneToMany(mappedBy = "ordem", targetEntity = OrdemAtendimento.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrdemAtendimento> atendimentos;
 
     @JsonIgnoreProperties("ordem")
     @OneToMany(mappedBy = "ordem", targetEntity = OrdemAndamento.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrdemAndamento> andamentos;
+    
+    @JsonIgnoreProperties(value = { "cliente", "ordemServico", "rnn", "pedido", "tecnico", "modelo", "valor", "tipo", "agendadoPor", "observacoes", "telefones" })
+    @Transient
+    private List<Estoque> pecas;
 
     @JsonIgnore
     public boolean temValor( )
@@ -95,6 +103,12 @@ public class OrdemServico extends Model
     public boolean temAndamento( )
     {
         return andamentos != null && !andamentos.isEmpty( );
+    }
+    
+    @JsonIgnore
+    public boolean temAtendimento( )
+    {
+        return atendimentos != null && !atendimentos.isEmpty( );
     }
 
     public Long getNumero( )
@@ -115,16 +129,6 @@ public class OrdemServico extends Model
     public void setCliente( Cliente cliente )
     {
         this.cliente = cliente;
-    }
-
-    public String getRnm( )
-    {
-        return rnm;
-    }
-
-    public void setRnm( String rnm )
-    {
-        this.rnm = rnm;
     }
 
     public TipoOrdem getTipo( )
@@ -187,12 +191,12 @@ public class OrdemServico extends Model
         this.baixa = baixa;
     }
 
-    public LocalDateTime getDataBaixa( )
+    public LocalDate getDataBaixa( )
     {
         return dataBaixa;
     }
 
-    public void setDataBaixa( LocalDateTime dataBaixa )
+    public void setDataBaixa( LocalDate dataBaixa )
     {
         this.dataBaixa = dataBaixa;
     }
@@ -247,6 +251,16 @@ public class OrdemServico extends Model
         this.valores = valores;
     }
 
+    public List<OrdemAtendimento> getAtendimentos( )
+    {
+        return atendimentos;
+    }
+
+    public void setAtendimentos( List<OrdemAtendimento> atendimentos )
+    {
+        this.atendimentos = atendimentos;
+    }
+
     public List<OrdemAndamento> getAndamentos( )
     {
         return andamentos;
@@ -255,6 +269,36 @@ public class OrdemServico extends Model
     public void setAndamentos( List<OrdemAndamento> andamentos )
     {
         this.andamentos = andamentos;
+    }
+
+    public List<Estoque> getPecas( )
+    {
+        return pecas;
+    }
+
+    public void setPecas( List<Estoque> pecas )
+    {
+        this.pecas = pecas;
+    }
+    
+    @Override
+    public OrdemServico clone( ) throws NegocioException
+    {
+        OrdemServico ordem = null;
+        try
+        {
+            ordem = (OrdemServico)super.clone( );
+            ordem.setEndereco( getEndereco( ).clone( ) );
+            ordem.setProduto( getProduto( ).clone( ) );
+            ordem.setValores( getValores( ).stream( ).map( v -> v.clone( ) ).collect( Collectors.toList( ) ) );
+            ordem.setAndamentos( getAndamentos( ).stream( ).map( a -> a.clone( ) ).collect( Collectors.toList( ) ) );
+        }
+        catch( CloneNotSupportedException e )
+        {
+            throw new NegocioException( "Erro ao clonar ordem de serviço" );
+        }
+        
+        return ordem;
     }
 
     @Override
@@ -289,7 +333,7 @@ public class OrdemServico extends Model
     @Override
     public String toString( )
     {
-        return "OrdemServico [numero=" + numero + ", cliente=" + cliente + ", rnm=" + rnm + ", tipo=" + tipo
+        return "OrdemServico [numero=" + numero + ", cliente=" + cliente + ", tipo=" + tipo
                 + ", dataChamada=" + dataChamada + ", dataAtendimento=" + dataAtendimento + ", atendente=" + atendente
                 + ", observacao=" + observacao + ", baixa=" + baixa + ", dataBaixa=" + dataBaixa + ", tecnico="
                 + tecnico + ", status=" + status + ", endereco=" + endereco + ", produto=" + produto + ", valores="

@@ -13,6 +13,7 @@ import javax.persistence.criteria.Root;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.util.StringUtils;
 
 import br.com.attomtech.talbosch.api.repository.paginacao.PaginacaoOrdenacao;
 
@@ -64,6 +65,31 @@ public abstract class RepositoryImpl<T,X> extends PaginacaoOrdenacao<X>
         query.select( builder.count( from ) );
         
         return manager.createQuery( query ).getSingleResult( );
+    }
+    
+    protected boolean hasText( String text )
+    {
+        return StringUtils.hasText( text );
+    }
+    
+    protected boolean isNotNull( Object obj )
+    {
+        return obj != null;
+    }
+    
+    protected CriteriaBuilder getCriteriaBuilder( )
+    {
+        return manager.getCriteriaBuilder( );
+    }
+    
+    protected CriteriaQuery<X> getCriteriaQuery( CriteriaBuilder builder )
+    {
+        return builder.createQuery( classe );
+    }
+    
+    protected Root<X> getRoot( CriteriaQuery<X> query )
+    {
+        return query.from( classe );
     }
     
     protected abstract Predicate[] filtrar( T filtro, CriteriaBuilder builder, Root<X> from );

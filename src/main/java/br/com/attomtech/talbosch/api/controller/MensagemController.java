@@ -51,12 +51,18 @@ public class MensagemController implements NegocioControllerAuditoria<Mensagem, 
         return ResponseEntity.ok( pagina );
     }
     
-    @Override
-    public ResponseEntity<Page<Mensagem>> pesquisar( MensagemFilter filtro, Pageable pageable )
+    @GetMapping("/nao-lidas")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Integer> naoLidas( Authentication auth )
     {
-        return null;
+        if( LOGGER.isDebugEnabled( ) )
+            LOGGER.debug( "Buscando não lidas > {}", auth.getName( ) );
+        
+        int naoLidas = service.buscarNaoLidas( auth.getName( ) );
+        
+        return ResponseEntity.ok( naoLidas );
     }
-
+    
     @Override
     @PostMapping
     @PreAuthorize("isAuthenticated()")
@@ -70,12 +76,6 @@ public class MensagemController implements NegocioControllerAuditoria<Mensagem, 
         return ResponseEntity.status( HttpStatus.CREATED ).body( mensagemSalva );
     }
 
-    @Override
-    public ResponseEntity<Mensagem> atualizar( @Valid Mensagem model, Authentication auth )
-    {
-        return null;
-    }
-    
     @GetMapping("/{codigo}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Mensagem> ler( @PathVariable Long codigo, Authentication auth )
@@ -86,12 +86,6 @@ public class MensagemController implements NegocioControllerAuditoria<Mensagem, 
         Mensagem mensagem = service.ler( codigo, auth.getName( ) );
         
         return ResponseEntity.ok( mensagem );
-    }
-
-    @Override
-    public ResponseEntity<Mensagem> buscarPorCodigo( @PathVariable Long codigo )
-    {
-        return null;
     }
 
     @Override
@@ -107,4 +101,21 @@ public class MensagemController implements NegocioControllerAuditoria<Mensagem, 
         return ResponseEntity.noContent( ).build( );
     }
 
+    @Override
+    public ResponseEntity<Page<Mensagem>> pesquisar( MensagemFilter filtro, Pageable pageable )
+    {
+        return null;
+    }
+    
+    @Override
+    public ResponseEntity<Mensagem> buscarPorCodigo( @PathVariable Long codigo )
+    {
+        return null;
+    }
+    
+    @Override
+    public ResponseEntity<Mensagem> atualizar( @Valid Mensagem model, Authentication auth )
+    {
+        return null;
+    }
 }

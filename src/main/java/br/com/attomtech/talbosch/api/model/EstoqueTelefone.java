@@ -9,11 +9,12 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+import br.com.attomtech.talbosch.api.exception.NegocioException;
 import br.com.attomtech.talbosch.api.model.abstracts.Telefone;
 
 @Table(name = "estoque_telefone")
 @Entity
-public class EstoqueTelefone extends Telefone
+public class EstoqueTelefone extends Telefone implements Cloneable
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,6 +25,22 @@ public class EstoqueTelefone extends Telefone
     @JoinColumn(name = "codigo_estoque")
     private Estoque estoque;
 
+    @Override
+    public EstoqueTelefone clone( ) throws NegocioException
+    {
+        EstoqueTelefone telefone = null;
+        try
+        {
+            telefone = (EstoqueTelefone)super.clone( );
+        }
+        catch( CloneNotSupportedException e )
+        {
+            throw new NegocioException( "Erro ao clonar telefone de estoque" );
+        }
+        
+        return telefone;
+    }
+    
     public Long getCodigo( )
     {
         return codigo;

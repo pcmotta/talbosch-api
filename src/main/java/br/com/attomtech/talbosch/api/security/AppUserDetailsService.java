@@ -1,8 +1,5 @@
 package br.com.attomtech.talbosch.api.security;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,27 +11,29 @@ import org.springframework.transaction.annotation.Transactional;
 
 import br.com.attomtech.talbosch.api.model.Usuario;
 import br.com.attomtech.talbosch.api.repository.UsuarioRepository;
-import br.com.attomtech.talbosch.api.service.UsuarioService;
+import br.com.attomtech.talbosch.api.service.MensagemService;
 
 @Service
 public class AppUserDetailsService implements UserDetailsService
 {
-    @Autowired
     private UsuarioRepository repository;
+    private MensagemService mensagemService;
     
     @Autowired
-    private UsuarioService service;
-
+    public AppUserDetailsService( UsuarioRepository repository, MensagemService service )
+    {
+        this.repository = repository;
+        this.mensagemService = service;
+    }
+    
     @Override
     @Transactional
     public UserDetails loadUserByUsername( String login ) throws UsernameNotFoundException
     {
         Optional<Usuario> usuarioOpt = repository.findByLoginAndAtivoTrue( login );
         Usuario usuario = usuarioOpt.orElseThrow( ( ) -> new UsernameNotFoundException( "Usuário e/ou Senha incorretos!" ) );
+        int mensagensNaoLidas = mensagemService.buscarNaoLidas( login );
         
-        usuario.setUltimoAcesso( LocalDateTime.ofInstant( Instant.now( ), ZoneId.of( "GMT-3" ) ) );
-        service.salvar( usuario );
-        
-        return new UsuarioSistema( usuario );
+        return new UsuarioSistema( usuario, mensagensNaoLidas );
     }
 }

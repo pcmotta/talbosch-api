@@ -6,7 +6,7 @@ import javax.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.Length;
 
 @MappedSuperclass
-public abstract class Telefone
+public abstract class Telefone implements Cloneable
 {
     @NotNull(message = "Número é obrigatório")
     protected Long numero;

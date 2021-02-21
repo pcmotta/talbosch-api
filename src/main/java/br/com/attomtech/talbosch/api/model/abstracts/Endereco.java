@@ -5,7 +5,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @MappedSuperclass
-public abstract class Endereco
+public abstract class Endereco implements Cloneable
 {
     @NotNull(message = "Logradouro é obrigatório")
     protected String logradouro;
@@ -27,7 +27,7 @@ public abstract class Endereco
 
     protected Long   cep;
     protected String proximidade;
-
+    
     public String getLogradouro( )
     {
         return logradouro;

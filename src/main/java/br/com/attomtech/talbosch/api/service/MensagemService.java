@@ -6,6 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -16,6 +19,7 @@ import br.com.attomtech.talbosch.api.model.Usuario;
 import br.com.attomtech.talbosch.api.repository.MensagemRepository;
 import br.com.attomtech.talbosch.api.repository.filter.MensagemFilter;
 import br.com.attomtech.talbosch.api.service.interfaces.NegocioServiceAuditoria;
+import br.com.attomtech.talbosch.api.utils.Utils;
 
 @Service
 public class MensagemService implements NegocioServiceAuditoria<Mensagem, MensagemFilter, Long>
@@ -44,7 +48,19 @@ public class MensagemService implements NegocioServiceAuditoria<Mensagem, Mensag
         
         return repository.pesquisar( filtro, pageable );
     }
+    
+    @Cacheable(value = "mensagensNaoLidas", key = "#login")
+    public int buscarNaoLidas( String login )
+    {
+        if( LOGGER.isDebugEnabled( ) )
+            LOGGER.debug( "Buscando não lidas > {}", login );
+        
+        int naoLidas = repository.buscarNaoLidas( usuarioService.buscarPorLogin( login ) );
+        
+        return naoLidas;
+    }
 
+    @CacheEvict(value = "mensagensNaoLidas", key = "#mensagem.usuarioDestino.login")
     @Override
     public Mensagem cadastrar( Mensagem mensagem, String login )
     {
@@ -54,6 +70,7 @@ public class MensagemService implements NegocioServiceAuditoria<Mensagem, Mensag
         Usuario usuario = usuarioService.buscarPorLogin( login );
         
         mensagem.setUsuarioOrigem( usuario );
+        mensagem.setData( Utils.horaAgora( ) );
         validarPermissao( mensagem, usuario );
         
         return salvar( mensagem );
@@ -65,6 +82,7 @@ public class MensagemService implements NegocioServiceAuditoria<Mensagem, Mensag
         return null;
     }
     
+    @CacheEvict(value = "mensagensNaoLidas", key = "#login")
     public Mensagem ler( Long codigo, String login )
     {
         Mensagem mensagem = buscarPorCodigo( codigo );
@@ -84,6 +102,7 @@ public class MensagemService implements NegocioServiceAuditoria<Mensagem, Mensag
         return mensagem;
     }
 
+    @Cacheable(value = "mensagem", key = "#codigo")
     @Override
     public Mensagem buscarPorCodigo( Long codigo )
     {
@@ -95,6 +114,7 @@ public class MensagemService implements NegocioServiceAuditoria<Mensagem, Mensag
         return mensagem.orElseThrow( ( ) -> new NegocioException( "Mensagem não encontrada" ) );
     }
 
+    @Caching(evict = { @CacheEvict(value = "mensagem", key = "#codigo"), @CacheEvict(value = "mensagensNaoLidas", key = "#login") })
     @Override
     public void excluir( Long codigo, String login )
     {
@@ -124,6 +144,18 @@ public class MensagemService implements NegocioServiceAuditoria<Mensagem, Mensag
             LOGGER.debug( "Salvando > {}", mensagem );
         
         return repository.save( mensagem );
+    }
+    
+    public void notificarEstoque( Usuario destino, String mensagem )
+    {
+        Mensagem message = new Mensagem( );
+        
+        message.setMensagem( mensagem );
+        message.setUsuarioDestino( destino );
+        message.setDeletadoOrigem( true );
+        message.setData( Utils.horaAgora( ) );
+        
+        salvar( message );
     }
     
     private void validarPermissao( Mensagem mensagem, Usuario usuario )

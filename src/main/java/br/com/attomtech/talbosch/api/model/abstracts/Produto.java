@@ -10,7 +10,7 @@ import br.com.attomtech.talbosch.api.model.enums.Aparelho;
 import br.com.attomtech.talbosch.api.model.enums.Fabricante;
 
 @MappedSuperclass
-public abstract class Produto
+public abstract class Produto implements Cloneable
 {
     @Enumerated(EnumType.STRING)
     protected Aparelho aparelho;

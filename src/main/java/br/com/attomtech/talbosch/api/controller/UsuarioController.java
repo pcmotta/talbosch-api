@@ -1,8 +1,6 @@
 package br.com.attomtech.talbosch.api.controller;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.IntStream;
 
 import javax.validation.Valid;
 
@@ -27,7 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.attomtech.talbosch.api.controller.interfaces.NegocioControllerAuditoria;
 import br.com.attomtech.talbosch.api.dto.UsuarioDTO;
 import br.com.attomtech.talbosch.api.model.Usuario;
-import br.com.attomtech.talbosch.api.model.enums.Permissao;
 import br.com.attomtech.talbosch.api.repository.filter.UsuarioFilter;
 import br.com.attomtech.talbosch.api.service.UsuarioService;
 import br.com.attomtech.talbosch.api.utils.LabelValue;
@@ -80,6 +77,18 @@ public class UsuarioController implements NegocioControllerAuditoria<Usuario, Us
         return ResponseEntity.ok( usuarioSalvo );
     }
     
+    @PutMapping("/atualizar")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Usuario> atualizarMeuUsuario( @RequestBody @Valid Usuario usuario, Authentication auth )
+    {
+        if( LOGGER.isDebugEnabled( ) )
+            LOGGER.debug( "Atualizando o próprio usuário >> {}", usuario );
+        
+        Usuario usuarioSalvo = service.atualizarProprioUsuario( usuario, auth.getName( ) );
+        
+        return ResponseEntity.ok( usuarioSalvo );
+    }
+    
     @Override
     @GetMapping("/{codigo}")
     @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('USUARIO')")
@@ -113,11 +122,7 @@ public class UsuarioController implements NegocioControllerAuditoria<Usuario, Us
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Buscando usuários" );
         
-        List<Usuario> usuariosAtivos = service.buscarUsuarios( );
-        List<UsuarioDTO> usuarios = new ArrayList<UsuarioDTO>( );
-        
-        usuariosAtivos.forEach( usuario -> 
-            usuarios.add( new UsuarioDTO( usuario ) ) );
+        List<UsuarioDTO> usuarios = service.buscarAtivos( );
         
         return ResponseEntity.ok( usuarios );
     }
@@ -129,17 +134,7 @@ public class UsuarioController implements NegocioControllerAuditoria<Usuario, Us
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Buscando Permissões" );
 
-        Usuario usuario = service.buscarPorLogin( auth.getName( ) );
-        Permissao[] permissoes;
-        
-        if( usuario.isAdministrador( ) )
-            permissoes = Permissao.values( );
-        else
-            permissoes = usuario.getPermissoes( ).stream( ).toArray( size -> new Permissao[size] );
-        
-        LabelValue[] values = new LabelValue[permissoes.length];
-        IntStream.range( 0, permissoes.length ).forEach( index ->
-                values[index] = new LabelValue( permissoes[index], permissoes[index].getDescricao( ) ) );
+        LabelValue[] values = service.buscarPermissoes( auth.getName( ) );
         
         return ResponseEntity.ok( values );
     }

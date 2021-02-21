@@ -2,6 +2,7 @@ package br.com.attomtech.talbosch.api.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -13,12 +14,14 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import br.com.attomtech.talbosch.api.exception.NegocioException;
 import br.com.attomtech.talbosch.api.model.abstracts.Model;
 import br.com.attomtech.talbosch.api.model.enums.Genero;
 import br.com.attomtech.talbosch.api.model.enums.TipoCliente;
@@ -26,7 +29,7 @@ import br.com.attomtech.talbosch.api.model.enums.TipoPessoa;
 
 @Table(name = "cliente")
 @Entity
-public class Cliente extends Model
+public class Cliente extends Model implements Cloneable
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -65,7 +68,30 @@ public class Cliente extends Model
     @JsonIgnoreProperties(value = "cliente")
     @OneToMany(mappedBy = "cliente", targetEntity = ClienteProduto.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ClienteProduto> produtos = new ArrayList<ClienteProduto>( );
+    
+    @JsonIgnoreProperties(value = { "cliente", "rnm", "atendente", "observacao", "endereco", "produto", "valores", "andamentos", "pecas", "auditoria" })
+    @Transient
+    private List<OrdemServico> ordensServico;
 
+    @Override
+    public Cliente clone( ) throws NegocioException
+    {
+        Cliente cliente = null;
+        try
+        {
+            cliente = (Cliente)super.clone( );
+            cliente.setEnderecos( getEnderecos( ).stream( ).map( e -> e.clone( ) ).collect( Collectors.toList( ) ) );
+            cliente.setTelefones( getTelefones( ).stream( ).map( t -> t.clone( ) ).collect( Collectors.toList( ) ) );
+            cliente.setProdutos( getProdutos( ).stream( ).map( p -> p.clone( ) ).collect( Collectors.toList( ) ) );
+        }
+        catch( CloneNotSupportedException e )
+        {
+            throw new NegocioException( "Erro ao clonar Cliente" );
+        }
+        
+        return cliente;
+    }
+    
     @JsonIgnore
     public boolean isPessoaFisica( )
     {
@@ -236,6 +262,16 @@ public class Cliente extends Model
     public void setProdutos( List<ClienteProduto> produtos )
     {
         this.produtos = produtos;
+    }
+    
+    public List<OrdemServico> getOrdensServico( )
+    {
+        return ordensServico;
+    }
+
+    public void setOrdensServico( List<OrdemServico> ordensServico )
+    {
+        this.ordensServico = ordensServico;
     }
 
     @Override

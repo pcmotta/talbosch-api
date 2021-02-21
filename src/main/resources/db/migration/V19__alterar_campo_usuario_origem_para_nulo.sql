@@ -1,0 +1,1 @@
+ALTER TABLE mensagem MODIFY codigo_usuario_origem BIGINT(20) NULL;

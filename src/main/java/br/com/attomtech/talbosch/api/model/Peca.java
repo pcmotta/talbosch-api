@@ -2,6 +2,7 @@ package br.com.attomtech.talbosch.api.model;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -17,13 +18,14 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import br.com.attomtech.talbosch.api.exception.NegocioException;
 import br.com.attomtech.talbosch.api.model.abstracts.Model;
 import br.com.attomtech.talbosch.api.model.enums.Aparelho;
 import br.com.attomtech.talbosch.api.model.enums.Fabricante;
 
 @Table(name = "peca")
 @Entity
-public class Peca extends Model
+public class Peca extends Model implements Cloneable
 {
     @Id
     private String codigo;
@@ -53,6 +55,23 @@ public class Peca extends Model
     @Column(name = "modelo", nullable = false)
     private List<String> modelos;
 
+    @Override
+    public Peca clone( ) throws NegocioException
+    {
+        Peca peca = null;
+        try
+        {
+            peca = (Peca)super.clone( );
+            peca.setModelos( getModelos( ).stream( ).map( modelo -> modelo ).collect( Collectors.toList( ) ) );
+        }
+        catch( CloneNotSupportedException e )
+        {
+            throw new NegocioException( "Erro ao clonar peça" );
+        }
+        
+        return peca;
+    }
+    
     public String getCodigo( )
     {
         return codigo;

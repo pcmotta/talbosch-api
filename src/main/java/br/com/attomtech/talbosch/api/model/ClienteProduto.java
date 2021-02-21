@@ -8,6 +8,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import br.com.attomtech.talbosch.api.exception.NegocioException;
 import br.com.attomtech.talbosch.api.model.abstracts.Produto;
 
 @Table(name = "produto")
@@ -22,6 +23,22 @@ public class ClienteProduto extends Produto
     @JoinColumn(name = "codigo_cliente")
     private Cliente cliente;
 
+    @Override
+    public ClienteProduto clone( ) throws NegocioException
+    {
+        ClienteProduto produto = null;
+        try
+        {
+            produto = (ClienteProduto)super.clone( );
+        }
+        catch( CloneNotSupportedException e )
+        {
+            throw new NegocioException( "Erro ao clonar produto de cliente" );
+        }
+        
+        return produto;
+    }
+    
     public Long getCodigo( )
     {
         return codigo;

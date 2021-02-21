@@ -19,7 +19,8 @@ public class EstoqueFilter
                                TECNICOCODIGO = "codigo",
                                TIPO          = "tipo",
                                STATUS        = "status",
-                               AGENDADOPARA  = "agendadoPara";
+                               AGENDADOPARA  = "agendadoPara",
+                               PEDIDO        = "pedido";
     
     private String        peca;
     private String        cliente;
@@ -33,6 +34,7 @@ public class EstoqueFilter
     
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate agendadoParaAte;
+    private String pedido;
 
     public String getPeca( )
     {
@@ -112,5 +114,15 @@ public class EstoqueFilter
     public void setAgendadoParaAte( LocalDate agendadoParaAte )
     {
         this.agendadoParaAte = agendadoParaAte;
+    }
+
+    public String getPedido( )
+    {
+        return pedido;
+    }
+
+    public void setPedido( String pedido )
+    {
+        this.pedido = pedido;
     }
 }

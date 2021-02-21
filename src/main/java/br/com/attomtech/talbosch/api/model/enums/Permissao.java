@@ -4,11 +4,13 @@ public enum Permissao
 {
     ADMINISTRADOR("Administrador"),
     ESTOQUE("Estoque"),
-    CADASTROPECA("Cadastro de Peças"),
+    PEDIDO("Cadastro de Pedidos"),
+    CADASTROPECAS("Cadastro de Peças"),
     ORDEMSERVICO("Ordem de Serviço"),
     CLIENTES("Clientes"),
     LOG("Log de Atividades"),
-    USUARIO("Cadastro de Usuários");
+    USUARIO("Cadastro de Usuários"),
+    ALTERAROSFINALIZADA("Alterar OS Finalizada");
     
     private String descricao;
 

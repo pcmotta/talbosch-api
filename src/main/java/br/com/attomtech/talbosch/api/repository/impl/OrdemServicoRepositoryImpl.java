@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -23,7 +24,7 @@ public class OrdemServicoRepositoryImpl extends RepositoryImpl<OrdemServicoFilte
     @Override
     public Page<OrdemServico> pesquisar( OrdemServicoFilter filtro, Pageable pageable )
     {
-        return pesquisarDados( filtro, pageable );
+        return pesquisarDados( filtro, pageable, "numero", false );
     }
 
     @Override
@@ -59,7 +60,12 @@ public class OrdemServicoRepositoryImpl extends RepositoryImpl<OrdemServicoFilte
             predicates.add( builder.lessThanOrEqualTo( from.get( OrdemServicoFilter.DATABAIXA ), LocalDateTime.of( filtro.getDataBaixaAte( ), LocalTime.of( 23, 59 ) ) ) );
         
         if( filtro.getTecnico( ) != null )
-            predicates.add( builder.equal( from.get( OrdemServicoFilter.TECNICO ), filtro.getTecnico( ) ) );
+        {
+            Join<Object, Object> atendimentos = from.join( "atendimentos", JoinType.LEFT );
+            
+            predicates.add( builder.or( builder.equal( from.get( OrdemServicoFilter.TECNICO ), filtro.getTecnico( ) ),
+                    builder.equal( atendimentos.get( OrdemServicoFilter.TECNICO ), filtro.getTecnico( ) ) ) );
+        }
         
         if( filtro.getStatus( ) != null )
             predicates.add( builder.equal( from.get( OrdemServicoFilter.STATUS ), filtro.getStatus( ) ) );

@@ -8,6 +8,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import br.com.attomtech.talbosch.api.exception.NegocioException;
 import br.com.attomtech.talbosch.api.model.abstracts.Endereco;
 
 @Table(name = "endereco")
@@ -21,7 +22,7 @@ public class ClienteEndereco extends Endereco
     @ManyToOne
     @JoinColumn(name = "codigo_cliente")
     private Cliente cliente;
-
+    
     public Long getCodigo( )
     {
         return codigo;
@@ -41,7 +42,23 @@ public class ClienteEndereco extends Endereco
     {
         this.cliente = cliente;
     }
-
+    
+    @Override
+    public ClienteEndereco clone( ) throws NegocioException
+    {
+        ClienteEndereco endereco = null;
+        try
+        {
+            endereco = (ClienteEndereco)super.clone( );
+        }
+        catch( CloneNotSupportedException e )
+        {
+            throw new NegocioException( "Erro ao clonar endereço de cliente" );
+        }
+        
+        return endereco;
+    }
+    
     @Override
     public int hashCode( )
     {

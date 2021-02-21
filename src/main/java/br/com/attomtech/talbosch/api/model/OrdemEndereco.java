@@ -8,14 +8,15 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import br.com.attomtech.talbosch.api.exception.NegocioException;
 import br.com.attomtech.talbosch.api.model.abstracts.Endereco;
 
 @Table(name = "ordem_servico_endereco")
 @Entity
-public class OrdemEndereco extends Endereco implements Serializable
+public class OrdemEndereco extends Endereco implements Cloneable, Serializable
 {
     private static final long serialVersionUID = 1L;
-
+    
     @Id
     @OneToOne
     @JoinColumn(name = "ordem_servico")
@@ -29,6 +30,29 @@ public class OrdemEndereco extends Endereco implements Serializable
     public void setOrdem( OrdemServico ordem )
     {
         this.ordem = ordem;
+    }
+    
+    public String formatar( )
+    {
+        return logradouro + (numero == null ? "" : ", " + numero) + (complemento == null ? "" : ", " + complemento)
+                + (bairro == null ? "" : " - " + bairro) + (municipio == null ? "" : " - " + municipio) + 
+                (proximidade == null ? "" : "(" + proximidade + ")");
+    }
+    
+    @Override
+    public OrdemEndereco clone( ) throws NegocioException
+    {
+        OrdemEndereco endereco = null;
+        try
+        {
+            endereco = (OrdemEndereco)super.clone( );
+        }
+        catch( CloneNotSupportedException e )
+        {
+            throw new NegocioException( "Erro ao clonar endereço de ordem de serviço" );
+        }
+        
+        return endereco;
     }
     
     @Override

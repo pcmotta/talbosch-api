@@ -1,6 +1,5 @@
 package br.com.attomtech.talbosch.api.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -12,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.attomtech.talbosch.api.controller.interfaces.NegocioController;
+import br.com.attomtech.talbosch.api.controller.interfaces.NegocioControllerAuditoria;
 import br.com.attomtech.talbosch.api.model.Tecnico;
 import br.com.attomtech.talbosch.api.repository.filter.TecnicoFilter;
 import br.com.attomtech.talbosch.api.service.TecnicoService;
@@ -28,7 +28,7 @@ import br.com.attomtech.talbosch.api.utils.LabelValue;
 
 @RestController
 @RequestMapping("/tecnicos")
-public class TecnicoController implements NegocioController<Tecnico, TecnicoFilter, Long>
+public class TecnicoController implements NegocioControllerAuditoria<Tecnico, TecnicoFilter, Long>
 {
     private static final Logger LOGGER = LoggerFactory.getLogger( TecnicoController.class );
     
@@ -55,12 +55,12 @@ public class TecnicoController implements NegocioController<Tecnico, TecnicoFilt
     @Override
     @PostMapping
     @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('USUARIO')")
-    public ResponseEntity<Tecnico> cadastrar( @RequestBody @Valid Tecnico tecnico )
+    public ResponseEntity<Tecnico> cadastrar( @RequestBody @Valid Tecnico tecnico, Authentication auth )
     {
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Cadastrando > {}", tecnico );
         
-        Tecnico tecnicoSalvo = service.cadastrar( tecnico );
+        Tecnico tecnicoSalvo = service.cadastrar( tecnico, auth.getName( ) );
         
         return ResponseEntity.status( HttpStatus.CREATED ).body( tecnicoSalvo );
     }
@@ -68,12 +68,12 @@ public class TecnicoController implements NegocioController<Tecnico, TecnicoFilt
     @Override
     @PutMapping
     @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('USUARIO')")
-    public ResponseEntity<Tecnico> atualizar( @Valid Tecnico tecnico )
+    public ResponseEntity<Tecnico> atualizar( @Valid Tecnico tecnico, Authentication auth )
     {
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Atualizando > {}", tecnico );
         
-        Tecnico tecnicoSalvo = service.atualizar( tecnico );
+        Tecnico tecnicoSalvo = service.atualizar( tecnico, auth.getName( ) );
         
         return ResponseEntity.ok( tecnicoSalvo );
     }
@@ -94,12 +94,12 @@ public class TecnicoController implements NegocioController<Tecnico, TecnicoFilt
     @Override
     @DeleteMapping("/{codigo}")
     @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('USUARIO')")
-    public ResponseEntity<Void> excluir( Long codigo )
+    public ResponseEntity<Void> excluir( Long codigo, Authentication auth )
     {
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Inativando > {}", codigo );
         
-        service.excluir( codigo );
+        service.excluir( codigo, auth.getName( ) );
         
         return ResponseEntity.noContent( ).build( );
     }
@@ -111,10 +111,7 @@ public class TecnicoController implements NegocioController<Tecnico, TecnicoFilt
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Buscando Ativos" );
         
-        List<Tecnico> tecnicos = service.buscarAtivos( );
-        List<LabelValue> tecnicosAtivos = new ArrayList<LabelValue>( );
-        
-        tecnicos.forEach( tecnico -> tecnicosAtivos.add( new LabelValue( tecnico.getCodigo( ), tecnico.getNome( ) ) ) );
+        List<LabelValue> tecnicosAtivos = service.buscarAtivos( );
         
         return ResponseEntity.ok( tecnicosAtivos );
     }

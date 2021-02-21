@@ -1,6 +1,6 @@
 package br.com.attomtech.talbosch.api.controller;
 
-import java.util.stream.IntStream;
+import java.util.List;
 
 import javax.validation.Valid;
 
@@ -9,7 +9,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -24,8 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.attomtech.talbosch.api.controller.interfaces.NegocioControllerAuditoria;
 import br.com.attomtech.talbosch.api.model.Estoque;
-import br.com.attomtech.talbosch.api.model.enums.StatusEstoque;
-import br.com.attomtech.talbosch.api.model.enums.TipoEstoque;
+import br.com.attomtech.talbosch.api.reports.EstoqueTecnicoReport;
 import br.com.attomtech.talbosch.api.repository.filter.EstoqueFilter;
 import br.com.attomtech.talbosch.api.service.EstoqueService;
 import br.com.attomtech.talbosch.api.utils.LabelValue;
@@ -95,7 +96,7 @@ public class EstoqueController implements NegocioControllerAuditoria<Estoque, Es
         
         return ResponseEntity.ok( estoque );
     }
-
+    
     @Override
     @DeleteMapping("/{codigo}")
     @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('ESTOQUE')")
@@ -104,9 +105,23 @@ public class EstoqueController implements NegocioControllerAuditoria<Estoque, Es
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Excluíndo -> {}", codigo );
         
-        service.excluir( codigo );
+        service.excluir( codigo, auth.getName( ) );
         
         return ResponseEntity.noContent( ).build( );
+    }
+    
+    @GetMapping("/pdf/tecnicos")
+    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('ESTOQUE')")
+    public ResponseEntity<byte[]> relatorioEstoqueTecnico( EstoqueTecnicoReport filtro )
+    {
+        if( LOGGER.isDebugEnabled( ) )
+            LOGGER.debug( "Gerando PDF Estoque Técnico" );
+        
+        byte[] pdf = service.relatorioTecnico( filtro );
+        
+        return ResponseEntity.ok( )
+                .header( HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_PDF_VALUE )
+                .body( pdf );
     }
     
     @GetMapping("/tipos")
@@ -116,25 +131,19 @@ public class EstoqueController implements NegocioControllerAuditoria<Estoque, Es
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Buscando tipos" );
         
-        TipoEstoque[] values = TipoEstoque.values( );
-        LabelValue[] labelValue = new LabelValue[values.length];
-        
-        IntStream.range( 0, values.length ).forEach( index -> labelValue[index] = new LabelValue( values[index], values[index].getDescricao( ) ) );
+        LabelValue[] labelValue = service.buscarTipos( );
         
         return ResponseEntity.ok( labelValue );
     }
     
     @GetMapping("/status")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<LabelValue[]> buscarStatus( )
+    public ResponseEntity<List<LabelValue>> buscarStatus( )
     {
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Buscando status" );
         
-        StatusEstoque[] values = StatusEstoque.values( );
-        LabelValue[] labelValue = new LabelValue[values.length];
-        
-        IntStream.range( 0, values.length ).forEach( index -> labelValue[index] = new LabelValue( values[index], values[index].getDescricao( ) ) );
+        List<LabelValue> labelValue = service.buscarStatus( );
         
         return ResponseEntity.ok( labelValue );
     }

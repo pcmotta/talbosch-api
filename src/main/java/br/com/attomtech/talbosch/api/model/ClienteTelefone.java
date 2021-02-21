@@ -10,6 +10,7 @@ import javax.persistence.Table;
 
 import org.hibernate.validator.constraints.Length;
 
+import br.com.attomtech.talbosch.api.exception.NegocioException;
 import br.com.attomtech.talbosch.api.model.abstracts.Telefone;
 
 @Table(name = "telefone")
@@ -84,6 +85,22 @@ public class ClienteTelefone extends Telefone
         else if( !codigo.equals( other.codigo ) )
             return false;
         return true;
+    }
+    
+    @Override
+    public ClienteTelefone clone( ) throws NegocioException
+    {
+        ClienteTelefone telefone = null;
+        try
+        {
+            telefone = (ClienteTelefone)super.clone( );
+        }
+        catch( CloneNotSupportedException e )
+        {
+            throw new NegocioException( "Erro ao clonar telefone de cliente" );
+        }
+        
+        return telefone;
     }
 
     @Override

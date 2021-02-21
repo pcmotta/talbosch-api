@@ -8,19 +8,36 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import br.com.attomtech.talbosch.api.exception.NegocioException;
 import br.com.attomtech.talbosch.api.model.abstracts.Produto;
 
 @Table(name = "ordem_servico_produto")
 @Entity
-public class OrdemProduto extends Produto implements Serializable
+public class OrdemProduto extends Produto implements Cloneable, Serializable
 {
     private static final long serialVersionUID = 1L;
-
+    
     @Id
     @OneToOne
     @JoinColumn(name = "ordem_servico")
     private OrdemServico ordem;
     private String     defeito;
+    
+    @Override
+    public OrdemProduto clone( ) throws NegocioException
+    {
+        OrdemProduto produto = null;
+        try
+        {
+            produto = (OrdemProduto)super.clone( );
+        }
+        catch( CloneNotSupportedException e )
+        {
+            throw new NegocioException( "Erro ao clonar produto de ordem de serviço" );
+        }
+        
+        return produto;
+    }
 
     public OrdemServico getOrdem( )
     {

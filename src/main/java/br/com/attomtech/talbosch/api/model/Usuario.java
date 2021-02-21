@@ -2,6 +2,7 @@ package br.com.attomtech.talbosch.api.model;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -22,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
+import br.com.attomtech.talbosch.api.exception.NegocioException;
 import br.com.attomtech.talbosch.api.model.abstracts.Model;
 import br.com.attomtech.talbosch.api.model.enums.Permissao;
 import br.com.attomtech.talbosch.api.validation.UsuarioGroupSequenceProvider;
@@ -30,7 +32,7 @@ import br.com.attomtech.talbosch.api.validation.groups.SenhaObrigatoriaGroup;
 @GroupSequenceProvider(value = UsuarioGroupSequenceProvider.class)
 @Table(name = "usuario")
 @Entity
-public class Usuario extends Model
+public class Usuario extends Model implements Cloneable
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -53,6 +55,9 @@ public class Usuario extends Model
     @Column(name = "permissao", nullable = false)
     @Enumerated(EnumType.STRING)
     private List<Permissao> permissoes;
+    
+    @Column(name = "notificar_estoque")
+    private boolean notificarEstoque;
     
     @JsonIgnore
     public boolean isNovo( )
@@ -137,6 +142,16 @@ public class Usuario extends Model
         this.permissoes = permissoes;
     }
 
+    public boolean isNotificarEstoque( )
+    {
+        return notificarEstoque;
+    }
+
+    public void setNotificarEstoque( boolean notificarEstoque )
+    {
+        this.notificarEstoque = notificarEstoque;
+    }
+
     @Override
     public int hashCode( )
     {
@@ -164,5 +179,23 @@ public class Usuario extends Model
         else if( !codigo.equals( other.codigo ) )
             return false;
         return true;
+    }
+    
+    @Override
+    public Usuario clone( ) throws NegocioException
+    {
+        Usuario usuario = null;
+        
+        try
+        {
+            usuario = (Usuario)super.clone( );
+            usuario.setPermissoes( getPermissoes().stream( ).map( p -> p ).collect( Collectors.toList( ) ) );
+        }
+        catch( CloneNotSupportedException e )
+        {
+            throw new NegocioException( "Erro ao clonar usuário" );
+        }
+        
+        return usuario;
     }
 }
