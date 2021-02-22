@@ -10,6 +10,7 @@ public enum Permissao
     CLIENTES("Clientes"),
     LOG("Log de Atividades"),
     USUARIO("Cadastro de Usuários"),
+    CADASTROTECNICO("Cadastro de Técnicos"),
     ALTERAROSFINALIZADA("Alterar OS Finalizada");
     
     private String descricao;

@@ -41,7 +41,7 @@ public class TecnicoController implements NegocioControllerAuditoria<Tecnico, Te
     
     @Override
     @GetMapping
-    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('USUARIO')")
+    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('CADASTROTECNICO')")
     public ResponseEntity<Page<Tecnico>> pesquisar( TecnicoFilter filtro, Pageable pageable )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -54,7 +54,7 @@ public class TecnicoController implements NegocioControllerAuditoria<Tecnico, Te
     
     @Override
     @PostMapping
-    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('USUARIO')")
+    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('CADASTROTECNICO')")
     public ResponseEntity<Tecnico> cadastrar( @RequestBody @Valid Tecnico tecnico, Authentication auth )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -67,7 +67,7 @@ public class TecnicoController implements NegocioControllerAuditoria<Tecnico, Te
 
     @Override
     @PutMapping
-    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('USUARIO')")
+    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('CADASTROTECNICO')")
     public ResponseEntity<Tecnico> atualizar( @Valid Tecnico tecnico, Authentication auth )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -80,7 +80,7 @@ public class TecnicoController implements NegocioControllerAuditoria<Tecnico, Te
 
     @Override
     @GetMapping("/{codigo}")
-    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('USUARIO')")
+    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('CADASTROTECNICO')")
     public ResponseEntity<Tecnico> buscarPorCodigo( Long codigo )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -93,7 +93,7 @@ public class TecnicoController implements NegocioControllerAuditoria<Tecnico, Te
 
     @Override
     @DeleteMapping("/{codigo}")
-    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('USUARIO')")
+    @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('CADASTROTECNICO')")
     public ResponseEntity<Void> excluir( Long codigo, Authentication auth )
     {
         if( LOGGER.isDebugEnabled( ) )
