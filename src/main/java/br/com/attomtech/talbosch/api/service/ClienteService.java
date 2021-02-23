@@ -56,6 +56,7 @@ public class ClienteService extends AuditoriaService<Cliente> implements Negocio
         return pagina;
     }
     
+    @Cacheable(value = "clientesTodos")
     public List<ClienteDTO> buscarTodosClientes( )
     {
         List<Cliente> clientes = repository.findAll( );

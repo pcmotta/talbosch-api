@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.attomtech.talbosch.api.controller.interfaces.NegocioControllerAuditoria;
 import br.com.attomtech.talbosch.api.model.Mensagem;
+import br.com.attomtech.talbosch.api.model.Model;
 import br.com.attomtech.talbosch.api.repository.filter.MensagemFilter;
 import br.com.attomtech.talbosch.api.service.MensagemService;
 
@@ -102,7 +103,7 @@ public class MensagemController implements NegocioControllerAuditoria<Mensagem, 
     }
 
     @Override
-    public ResponseEntity<Page<Mensagem>> pesquisar( MensagemFilter filtro, Pageable pageable )
+    public ResponseEntity<Page<? extends Model>> pesquisar( MensagemFilter filtro, Pageable pageable )
     {
         return null;
     }

@@ -16,18 +16,31 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.StringUtils;
 
+import br.com.attomtech.talbosch.api.dto.EstoquePesquisaDTO;
 import br.com.attomtech.talbosch.api.model.Estoque;
 import br.com.attomtech.talbosch.api.model.enums.TipoEstoque;
 import br.com.attomtech.talbosch.api.reports.EstoqueTecnicoReport;
 import br.com.attomtech.talbosch.api.repository.filter.EstoqueFilter;
 import br.com.attomtech.talbosch.api.repository.query.EstoqueRepositoryQuery;
 
-public class EstoqueRepositoryImpl extends RepositoryImpl<EstoqueFilter, Estoque> implements EstoqueRepositoryQuery
+public class EstoqueRepositoryImpl extends RepositoryImplDto<EstoqueFilter, Estoque, EstoquePesquisaDTO> implements EstoqueRepositoryQuery
 {
     @Override
-    public Page<Estoque> pesquisar( EstoqueFilter filtro, Pageable pageable )
+    public Page<EstoquePesquisaDTO> pesquisar( EstoqueFilter filtro, Pageable pageable )
     {
-        return pesquisarDados( filtro, pageable, "agendadoPara", false );
+        return pesquisarDadosDto( filtro, pageable, "agendadoPara", false );
+    }
+    
+    @Override
+    protected void select( CriteriaBuilder builder, CriteriaQuery<EstoquePesquisaDTO> query, Root<Estoque> from )
+    {
+        Join<Object, Object> peca = from.join( EstoqueFilter.PECA );
+        Join<Object, Object> cliente = from.join( EstoqueFilter.CLIENTE );
+        Join<Object, Object> ordemServico = from.join( EstoqueFilter.OS );
+        
+        query.select( builder.construct( EstoquePesquisaDTO.class, from.get( "codigo" ),
+                peca.get( "codigo" ), peca.get( "descricao" ), cliente.get( "nome" ), ordemServico.get( "numero" ),
+                from.get( "agendadoPara" ), from.get( "tipo" ), from.get( "status" ) ) );
     }
 
     @Override

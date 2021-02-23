@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.attomtech.talbosch.api.controller.interfaces.NegocioControllerAuditoria;
 import br.com.attomtech.talbosch.api.dto.UsuarioDTO;
+import br.com.attomtech.talbosch.api.model.Model;
 import br.com.attomtech.talbosch.api.model.Usuario;
 import br.com.attomtech.talbosch.api.repository.filter.UsuarioFilter;
 import br.com.attomtech.talbosch.api.service.UsuarioService;
@@ -41,7 +42,7 @@ public class UsuarioController implements NegocioControllerAuditoria<Usuario, Us
     @Override
     @GetMapping
     @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('USUARIO')")
-    public ResponseEntity<Page<Usuario>> pesquisar( UsuarioFilter filtro, Pageable pageable )
+    public ResponseEntity<Page<? extends Model>> pesquisar( UsuarioFilter filtro, Pageable pageable )
     {
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Buscando Usuários" );
@@ -122,7 +123,7 @@ public class UsuarioController implements NegocioControllerAuditoria<Usuario, Us
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Buscando usuários" );
         
-        List<UsuarioDTO> usuarios = service.buscarAtivos( );
+        List<UsuarioDTO> usuarios = service.buscarUsuarios( );
         
         return ResponseEntity.ok( usuarios );
     }

@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import br.com.attomtech.talbosch.api.dto.EstoquePesquisaDTO;
 import br.com.attomtech.talbosch.api.exception.NegocioException;
 import br.com.attomtech.talbosch.api.jasper.JasperUtils;
 import br.com.attomtech.talbosch.api.log.EstoqueLog;
@@ -32,11 +33,11 @@ import br.com.attomtech.talbosch.api.model.enums.TipoEstoque;
 import br.com.attomtech.talbosch.api.reports.EstoqueTecnicoReport;
 import br.com.attomtech.talbosch.api.repository.EstoqueRepository;
 import br.com.attomtech.talbosch.api.repository.filter.EstoqueFilter;
-import br.com.attomtech.talbosch.api.service.interfaces.NegocioServiceAuditoria;
+import br.com.attomtech.talbosch.api.service.interfaces.NegocioServiceAuditoriaDto;
 import br.com.attomtech.talbosch.api.utils.LabelValue;
 
 @Service
-public class EstoqueService extends AuditoriaService<Estoque> implements NegocioServiceAuditoria<Estoque, EstoqueFilter, Long>
+public class EstoqueService extends AuditoriaService<Estoque> implements NegocioServiceAuditoriaDto<Estoque, EstoqueFilter, EstoquePesquisaDTO, Long>
 {
     private static final Logger LOGGER = LoggerFactory.getLogger( EstoqueService.class );
     
@@ -57,12 +58,12 @@ public class EstoqueService extends AuditoriaService<Estoque> implements Negocio
     }
 
     @Override
-    public Page<Estoque> pesquisar( EstoqueFilter filtro, Pageable pageable )
+    public Page<EstoquePesquisaDTO> pesquisar( EstoqueFilter filtro, Pageable pageable )
     {
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Pesquisando -> {}", filtro );
         
-        Page<Estoque> pagina = repository.pesquisar( filtro, pageable );
+        Page<EstoquePesquisaDTO> pagina = repository.pesquisar( filtro, pageable );
         
         return pagina;
     }

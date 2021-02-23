@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.attomtech.talbosch.api.controller.interfaces.NegocioControllerAuditoria;
+import br.com.attomtech.talbosch.api.model.Model;
 import br.com.attomtech.talbosch.api.model.OrdemServico;
 import br.com.attomtech.talbosch.api.repository.filter.OrdemServicoFilter;
 import br.com.attomtech.talbosch.api.service.OrdemServicoService;
@@ -47,7 +48,7 @@ public class OrdemServicoController implements NegocioControllerAuditoria<OrdemS
     @Override
     @GetMapping
     @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('ORDEMSERVICO')")
-    public ResponseEntity<Page<OrdemServico>> pesquisar( OrdemServicoFilter filtro, Pageable pageable )
+    public ResponseEntity<Page<? extends Model>> pesquisar( OrdemServicoFilter filtro, Pageable pageable )
     {
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Pesquisando > {}", filtro );

@@ -25,7 +25,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.attomtech.talbosch.api.controller.interfaces.NegocioControllerAuditoria;
+import br.com.attomtech.talbosch.api.dto.EstoquePesquisaDTO;
 import br.com.attomtech.talbosch.api.model.Estoque;
+import br.com.attomtech.talbosch.api.model.Model;
 import br.com.attomtech.talbosch.api.reports.EstoqueTecnicoReport;
 import br.com.attomtech.talbosch.api.repository.filter.EstoqueFilter;
 import br.com.attomtech.talbosch.api.service.EstoqueService;
@@ -48,12 +50,12 @@ public class EstoqueController implements NegocioControllerAuditoria<Estoque, Es
     @Override
     @GetMapping
     @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('ESTOQUE')")
-    public ResponseEntity<Page<Estoque>> pesquisar( EstoqueFilter filtro, Pageable pageable )
+    public ResponseEntity<Page<? extends Model>> pesquisar( EstoqueFilter filtro, Pageable pageable )
     {
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Pesquisando -> {}", filtro );
         
-        Page<Estoque> pagina = service.pesquisar( filtro, pageable );
+        Page<EstoquePesquisaDTO> pagina = service.pesquisar( filtro, pageable );
         
         return ResponseEntity.ok( pagina );
     }

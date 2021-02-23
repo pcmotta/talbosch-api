@@ -22,7 +22,7 @@ import br.com.attomtech.talbosch.api.model.enums.AreaLog;
 
 @Entity
 @Table(name = "log_de_atividades")
-public class LogAtividades
+public class LogAtividades implements Model
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

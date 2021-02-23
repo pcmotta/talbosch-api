@@ -6,7 +6,7 @@ import javax.persistence.MappedSuperclass;
 import br.com.attomtech.talbosch.api.model.Auditoria;
 
 @MappedSuperclass
-public abstract class Model
+public abstract class Model implements br.com.attomtech.talbosch.api.model.Model
 {
     @Embedded
     protected Auditoria auditoria = new Auditoria( );

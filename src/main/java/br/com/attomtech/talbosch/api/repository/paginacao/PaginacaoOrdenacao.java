@@ -10,9 +10,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.util.StringUtils;
 
-public abstract class PaginacaoOrdenacao<T>
+import br.com.attomtech.talbosch.api.model.Model;
+
+public abstract class PaginacaoOrdenacao<T extends Model>
 {
-    protected void adicionarPaginacao( TypedQuery<T> typed, Pageable pageable )
+    protected void adicionarPaginacao( TypedQuery<? extends Model> typed, Pageable pageable )
     {
         int paginaAtual              = pageable.getPageNumber( );
         int totalRegistrosPorPagina  = pageable.getPageSize( );
@@ -22,12 +24,12 @@ public abstract class PaginacaoOrdenacao<T>
         typed.setMaxResults( totalRegistrosPorPagina );
     }
     
-    protected void adicionarOrdenacao( Pageable pageable, CriteriaBuilder builder, CriteriaQuery<T> query, Root<T> root, String orderDefault )
+    protected void adicionarOrdenacao( Pageable pageable, CriteriaBuilder builder, CriteriaQuery<? extends Model> query, Root<T> root, String orderDefault )
     {
         adicionarOrdenacao( pageable, builder, query, root, orderDefault, true );
     }
     
-    protected void adicionarOrdenacao( Pageable pageable, CriteriaBuilder builder, CriteriaQuery<T> query, Root<T> root, String orderDefault, boolean isAsc )
+    protected void adicionarOrdenacao( Pageable pageable, CriteriaBuilder builder, CriteriaQuery<? extends Model> query, Root<T> root, String orderDefault, boolean isAsc )
     {
         Sort sort = pageable.getSort( );
         

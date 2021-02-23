@@ -28,6 +28,7 @@ import br.com.attomtech.talbosch.api.dto.ClienteDTO;
 import br.com.attomtech.talbosch.api.model.Cliente;
 import br.com.attomtech.talbosch.api.model.ClienteEndereco;
 import br.com.attomtech.talbosch.api.model.ClienteProduto;
+import br.com.attomtech.talbosch.api.model.Model;
 import br.com.attomtech.talbosch.api.repository.filter.ClienteFilter;
 import br.com.attomtech.talbosch.api.service.ClienteService;
 import br.com.attomtech.talbosch.api.utils.LabelValue;
@@ -44,7 +45,7 @@ public class ClienteController implements NegocioControllerAuditoria<Cliente, Cl
     @Override
     @GetMapping
     @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('CLIENTES')")
-    public ResponseEntity<Page<Cliente>> pesquisar( ClienteFilter filtro, Pageable pageable )
+    public ResponseEntity<Page<? extends Model>> pesquisar( ClienteFilter filtro, Pageable pageable )
     {
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Pesquisando > {}", filtro );
@@ -166,7 +167,6 @@ public class ClienteController implements NegocioControllerAuditoria<Cliente, Cl
         return ResponseEntity.ok( values );
     }
     
-    @Cacheable(value = "clientesTodos")
     @GetMapping("/todos")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ClienteDTO>> buscarClientes( )

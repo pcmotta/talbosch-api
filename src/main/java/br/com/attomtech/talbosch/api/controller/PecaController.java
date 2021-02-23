@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.attomtech.talbosch.api.controller.interfaces.NegocioControllerAuditoria;
 import br.com.attomtech.talbosch.api.dto.PecaDTO;
+import br.com.attomtech.talbosch.api.model.Model;
 import br.com.attomtech.talbosch.api.model.Peca;
 import br.com.attomtech.talbosch.api.repository.filter.PecaFilter;
 import br.com.attomtech.talbosch.api.service.PecaService;
@@ -41,7 +42,7 @@ public class PecaController implements NegocioControllerAuditoria<Peca, PecaFilt
     @Override
     @GetMapping
     @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('CADASTROPECA')")
-    public ResponseEntity<Page<Peca>> pesquisar( PecaFilter filtro, Pageable pageable )
+    public ResponseEntity<Page<? extends Model>> pesquisar( PecaFilter filtro, Pageable pageable )
     {
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Pesquisando > {}", filtro );

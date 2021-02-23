@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.attomtech.talbosch.api.controller.interfaces.NegocioControllerAuditoria;
 import br.com.attomtech.talbosch.api.filter.PedidoFilter;
+import br.com.attomtech.talbosch.api.model.Model;
 import br.com.attomtech.talbosch.api.model.Pedido;
 import br.com.attomtech.talbosch.api.service.PedidoService;
 import br.com.attomtech.talbosch.api.utils.LabelValue;
@@ -42,7 +43,7 @@ public class PedidoController implements NegocioControllerAuditoria<Pedido, Pedi
     @GetMapping
     @PreAuthorize("hasAuthority('ADMINISTRADOR') or hasAuthority('PEDIDO')")
     @Override
-    public ResponseEntity<Page<Pedido>> pesquisar( PedidoFilter filtro, Pageable pageable )
+    public ResponseEntity<Page<? extends Model>> pesquisar( PedidoFilter filtro, Pageable pageable )
     {
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Pesquisando > {}", filtro );

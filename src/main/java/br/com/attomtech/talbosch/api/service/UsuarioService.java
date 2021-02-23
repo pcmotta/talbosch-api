@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.slf4j.Logger;
@@ -56,14 +55,19 @@ public class UsuarioService extends AuditoriaService<Usuario> implements Negocio
         return pagina;
     }
     
-    public List<Usuario> buscarUsuarios( )
+    @Cacheable(value = "todosUsuarios")
+    public List<UsuarioDTO> buscarUsuarios( )
     {
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Buscando usuários" );
 
         List<Usuario> usuarios = repository.findAll( );
+        List<UsuarioDTO> usuariosDto = new ArrayList<UsuarioDTO>( );
         
-        return usuarios.stream( ).filter( u -> u.getCodigo( ) > 1 ).collect( Collectors.toList( ) );
+        usuarios.stream( ).filter( u -> u.getCodigo( ) > 1 ).forEach( usuario -> 
+            usuariosDto.add( new UsuarioDTO( usuario ) ) );
+        
+        return usuariosDto;
     }
     
     @Override
@@ -81,7 +85,7 @@ public class UsuarioService extends AuditoriaService<Usuario> implements Negocio
         return usuarioSalvo;
     }
     
-    @Caching(evict = { @CacheEvict(value = "usuario", key = "#usuario.codigo"), @CacheEvict(value = "usuariosAtivos", allEntries = true) })
+    @Caching(evict = { @CacheEvict(value = "usuario", key = "#usuario.codigo"), @CacheEvict(value = "todosUsuarios", allEntries = true) })
     @Override
     public Usuario atualizar( Usuario usuario, String login )
     {
@@ -133,7 +137,7 @@ public class UsuarioService extends AuditoriaService<Usuario> implements Negocio
         return usuario;
     }
     
-    @Caching(evict = { @CacheEvict(value = "usuario", key = "#codigo"), @CacheEvict(value = "usuariosAtivos", allEntries = true) })
+    @Caching(evict = { @CacheEvict(value = "usuario", key = "#codigo"), @CacheEvict(value = "todosUsuarios", allEntries = true) })
     @Override
     public void excluir( Long codigo, String login )
     {
@@ -179,21 +183,6 @@ public class UsuarioService extends AuditoriaService<Usuario> implements Negocio
         Optional<Usuario> usuarioOpt = repository.findByLoginAndAtivoTrue( login );
         
         return usuarioOpt.orElseThrow( ( ) -> new NegocioException( "Usuário não encontrado" ) );
-    }
-    
-    @Cacheable(value = "usuariosAtivos")
-    public List<UsuarioDTO> buscarAtivos( )
-    {
-        if( LOGGER.isDebugEnabled( ) )
-            LOGGER.debug( "Buscando usuários" );
-        
-        List<Usuario> usuariosAtivos = buscarUsuarios( );
-        List<UsuarioDTO> usuarios = new ArrayList<UsuarioDTO>( );
-        
-        usuariosAtivos.forEach( usuario -> 
-            usuarios.add( new UsuarioDTO( usuario ) ) );
-        
-        return usuarios;
     }
     
     @Cacheable(value = "permissoes", key = "#login")
