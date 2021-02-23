@@ -166,6 +166,7 @@ public class ClienteController implements NegocioControllerAuditoria<Cliente, Cl
         return ResponseEntity.ok( values );
     }
     
+    @Cacheable(value = "clientesTodos")
     @GetMapping("/todos")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ClienteDTO>> buscarClientes( )
