@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CompoundSelection;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaBuilder.In;
 import javax.persistence.criteria.CriteriaQuery;
@@ -16,7 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.StringUtils;
 
-import br.com.attomtech.talbosch.api.dto.EstoquePesquisaDTO;
+import br.com.attomtech.talbosch.api.dto.pesquisa.EstoquePesquisaDTO;
 import br.com.attomtech.talbosch.api.model.Estoque;
 import br.com.attomtech.talbosch.api.model.enums.TipoEstoque;
 import br.com.attomtech.talbosch.api.reports.EstoqueTecnicoReport;
@@ -32,15 +33,15 @@ public class EstoqueRepositoryImpl extends RepositoryImplDto<EstoqueFilter, Esto
     }
     
     @Override
-    protected void select( CriteriaBuilder builder, CriteriaQuery<EstoquePesquisaDTO> query, Root<Estoque> from )
+    protected CompoundSelection<EstoquePesquisaDTO> select( CriteriaBuilder builder, Root<Estoque> from )
     {
         Join<Object, Object> peca = from.join( EstoqueFilter.PECA );
         Join<Object, Object> cliente = from.join( EstoqueFilter.CLIENTE );
         Join<Object, Object> ordemServico = from.join( EstoqueFilter.OS );
         
-        query.select( builder.construct( EstoquePesquisaDTO.class, from.get( "codigo" ),
+        return builder.construct( EstoquePesquisaDTO.class, from.get( "codigo" ),
                 peca.get( "codigo" ), peca.get( "descricao" ), cliente.get( "nome" ), ordemServico.get( "numero" ),
-                from.get( "agendadoPara" ), from.get( "tipo" ), from.get( "status" ) ) );
+                from.get( "agendadoPara" ), from.get( "tipo" ), from.get( "status" ) );
     }
 
     @Override

@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.attomtech.talbosch.api.controller.interfaces.NegocioControllerAuditoria;
-import br.com.attomtech.talbosch.api.dto.EstoquePesquisaDTO;
+import br.com.attomtech.talbosch.api.dto.pesquisa.EstoquePesquisaDTO;
 import br.com.attomtech.talbosch.api.model.Estoque;
 import br.com.attomtech.talbosch.api.model.Model;
 import br.com.attomtech.talbosch.api.reports.EstoqueTecnicoReport;

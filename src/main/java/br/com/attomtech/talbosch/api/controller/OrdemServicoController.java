@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.attomtech.talbosch.api.controller.interfaces.NegocioControllerAuditoria;
+import br.com.attomtech.talbosch.api.dto.pesquisa.OrdemServicoPesquisaDTO;
 import br.com.attomtech.talbosch.api.model.Model;
 import br.com.attomtech.talbosch.api.model.OrdemServico;
 import br.com.attomtech.talbosch.api.repository.filter.OrdemServicoFilter;
@@ -53,7 +54,7 @@ public class OrdemServicoController implements NegocioControllerAuditoria<OrdemS
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Pesquisando > {}", filtro );
         
-        Page<OrdemServico> pagina = service.pesquisar( filtro, pageable );
+        Page<OrdemServicoPesquisaDTO> pagina = service.pesquisar( filtro, pageable );
         
         return ResponseEntity.ok( pagina );
     }

@@ -3,6 +3,7 @@ package br.com.attomtech.talbosch.api.repository.paginacao;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Root;
 
@@ -35,10 +36,22 @@ public abstract class PaginacaoOrdenacao<T extends Model>
         
         if( sort != null && sort.iterator( ).hasNext( ) )
         {
-            Sort.Order order = sort.iterator( ).next( );
-            Path<Object> property = root.get( order.getProperty( ) );
+            Path<Object> path = null;
             
-            query.orderBy( order.isAscending( ) ? builder.asc( property ) : builder.desc( property ) );
+            Sort.Order order = sort.iterator( ).next( );
+            
+            String property = order.getProperty( );
+            if( property.contains( "." ) )
+            {
+                String[] properties = property.split( "\\." );
+                Join<Object, Object> join = root.join( properties[0] );
+                
+                path = join.get( properties[1] );
+            }
+            else
+                path = root.get( property );
+            
+            query.orderBy( order.isAscending( ) ? builder.asc( path ) : builder.desc( path ) );
         }
         else if( StringUtils.hasText( orderDefault ) )
             query.orderBy( isAsc ? builder.asc( root.get( orderDefault ) ) : builder.desc( root.get( orderDefault ) ) );

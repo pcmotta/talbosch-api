@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import br.com.attomtech.talbosch.api.dto.OrdemServicoRelatorioDTO;
+import br.com.attomtech.talbosch.api.dto.pesquisa.OrdemServicoPesquisaDTO;
 import br.com.attomtech.talbosch.api.exception.NegocioException;
 import br.com.attomtech.talbosch.api.jasper.JasperUtils;
 import br.com.attomtech.talbosch.api.log.OrdemServicoLog;
@@ -64,7 +65,7 @@ public class OrdemServicoService extends AuditoriaService<OrdemServico> implemen
     }
 
     @Override
-    public Page<OrdemServico> pesquisar( OrdemServicoFilter filtro, Pageable pageable )
+    public Page<OrdemServicoPesquisaDTO> pesquisar( OrdemServicoFilter filtro, Pageable pageable )
     {
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Pesquisando > {}", filtro );

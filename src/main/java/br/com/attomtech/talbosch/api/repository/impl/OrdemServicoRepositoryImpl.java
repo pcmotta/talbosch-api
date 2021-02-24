@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.criteria.CompoundSelection;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
@@ -15,16 +16,28 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.StringUtils;
 
+import br.com.attomtech.talbosch.api.dto.pesquisa.OrdemServicoPesquisaDTO;
 import br.com.attomtech.talbosch.api.model.OrdemServico;
 import br.com.attomtech.talbosch.api.repository.filter.OrdemServicoFilter;
 import br.com.attomtech.talbosch.api.repository.query.OrdemServicoRepositoryQuery;
 
-public class OrdemServicoRepositoryImpl extends RepositoryImpl<OrdemServicoFilter, OrdemServico> implements OrdemServicoRepositoryQuery
+public class OrdemServicoRepositoryImpl extends RepositoryImplDto<OrdemServicoFilter, OrdemServico, OrdemServicoPesquisaDTO> implements OrdemServicoRepositoryQuery
 {
     @Override
-    public Page<OrdemServico> pesquisar( OrdemServicoFilter filtro, Pageable pageable )
+    public Page<OrdemServicoPesquisaDTO> pesquisar( OrdemServicoFilter filtro, Pageable pageable )
     {
-        return pesquisarDados( filtro, pageable, "numero", false );
+        return pesquisarDadosDto( filtro, pageable, "numero", false );
+    }
+    
+    @Override
+    protected CompoundSelection<OrdemServicoPesquisaDTO> select( CriteriaBuilder builder, Root<OrdemServico> from )
+    {
+        Join<Object, Object> cliente = from.join( OrdemServicoFilter.CLIENTE );
+        Join<Object, Object> produto = from.join( OrdemServicoFilter.PRODUTO );
+        
+        return builder.construct( OrdemServicoPesquisaDTO.class, from.get( "numero" ),
+                cliente.get( "nome" ), from.get( "dataAtendimento" ), produto.get( "aparelho" ), produto.get( "fabricante" ),
+                from.get( "status" ), from.get( "tipo" ) );
     }
 
     @Override

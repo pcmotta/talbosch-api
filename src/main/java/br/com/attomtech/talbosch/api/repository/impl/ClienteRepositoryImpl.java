@@ -3,7 +3,10 @@ package br.com.attomtech.talbosch.api.repository.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CompoundSelection;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -12,17 +15,42 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.StringUtils;
 
+import br.com.attomtech.talbosch.api.dto.ClienteDTO;
+import br.com.attomtech.talbosch.api.dto.pesquisa.ClientePesquisaDTO;
 import br.com.attomtech.talbosch.api.model.Cliente;
 import br.com.attomtech.talbosch.api.repository.filter.ClienteFilter;
 import br.com.attomtech.talbosch.api.repository.query.ClienteRepositoryQuery;
 
-public class ClienteRepositoryImpl extends RepositoryImpl<ClienteFilter, Cliente> implements ClienteRepositoryQuery
+public class ClienteRepositoryImpl extends RepositoryImplDto<ClienteFilter, Cliente, ClientePesquisaDTO> implements ClienteRepositoryQuery
 {
     @Override
-    public Page<Cliente> pesquisar( ClienteFilter filtro, Pageable pageable )
+    public Page<ClientePesquisaDTO> pesquisar( ClienteFilter filtro, Pageable pageable )
     {
-        return pesquisarDados( filtro, pageable, "nome" );
+        return pesquisarDadosDto( filtro, pageable, "nome" );
     }
+    
+    @Override
+    protected CompoundSelection<ClientePesquisaDTO> select( CriteriaBuilder builder, Root<Cliente> from )
+    {
+        return builder.construct( ClientePesquisaDTO.class, from.get( "codigo" ), from.get( "nome" ),
+                from.get( "cpfCnpj" ), from.get( "tipoPessoa" ), from.get( "bandeiraVermelha" ) );
+    }
+    
+    @Override
+    public List<ClienteDTO> buscarTodos( )
+    {
+        CriteriaBuilder           builder = getCriteriaBuilder( );
+        CriteriaQuery<ClienteDTO> query   = builder.createQuery( ClienteDTO.class );
+        Root<Cliente>             from    = query.from( Cliente.class );
+        
+        query.select( builder.construct( ClienteDTO.class, from.get( "codigo" ), from.get( "nome" ),
+                from.get( "cpfCnpj" ), from.get( "tipoPessoa" ), from.get( "ativo" ) ) );
+
+        TypedQuery<ClienteDTO> typed = manager.createQuery( query );
+        
+        return typed.getResultList( );
+    }
+
 
     @Override
     protected Predicate[] filtrar( ClienteFilter filtro, CriteriaBuilder builder, Root<Cliente> from )
@@ -80,5 +108,4 @@ public class ClienteRepositoryImpl extends RepositoryImpl<ClienteFilter, Cliente
         
         return predicates.toArray( new Predicate[predicates.size( )] );
     }
-
 }

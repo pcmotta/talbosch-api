@@ -3,23 +3,35 @@ package br.com.attomtech.talbosch.api.repository.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.criteria.CompoundSelection;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import br.com.attomtech.talbosch.api.dto.pesquisa.PedidoPesquisaDTO;
 import br.com.attomtech.talbosch.api.filter.PedidoFilter;
 import br.com.attomtech.talbosch.api.model.Pedido;
 import br.com.attomtech.talbosch.api.repository.query.PedidoRepositoryQuery;
 
-public class PedidoRepositoryImpl extends RepositoryImpl<PedidoFilter, Pedido> implements PedidoRepositoryQuery
+public class PedidoRepositoryImpl extends RepositoryImplDto<PedidoFilter, Pedido, PedidoPesquisaDTO> implements PedidoRepositoryQuery
 {
     @Override
-    public Page<Pedido> pesquisar( PedidoFilter filtro, Pageable pageable )
+    public Page<PedidoPesquisaDTO> pesquisar( PedidoFilter filtro, Pageable pageable )
     {
-        return pesquisarDados( filtro, pageable, "data", false );
+        return pesquisarDadosDto( filtro, pageable, "data", false );
+    }
+    
+    @Override
+    protected CompoundSelection<PedidoPesquisaDTO> select( CriteriaBuilder builder, Root<Pedido> from )
+    {
+        Join<Object, Object> pedidoPor = from.join( "pedidoPor" );
+        
+        return builder.construct( PedidoPesquisaDTO.class, from.get( "codigo" ), from.get( "pedido" ),
+                from.get( "data" ), from.get( "status" ), pedidoPor.get( "nome" ) );
     }
     
     @Override

@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import br.com.attomtech.talbosch.api.dto.PecaDTO;
+import br.com.attomtech.talbosch.api.dto.pesquisa.PecaPesquisaDTO;
 import br.com.attomtech.talbosch.api.exception.NegocioException;
 import br.com.attomtech.talbosch.api.log.PecaLog;
 import br.com.attomtech.talbosch.api.model.Peca;
@@ -43,12 +44,12 @@ public class PecaService extends AuditoriaService<Peca> implements NegocioServic
     }
     
     @Override
-    public Page<Peca> pesquisar( PecaFilter filtro, Pageable pageable )
+    public Page<PecaPesquisaDTO> pesquisar( PecaFilter filtro, Pageable pageable )
     {
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Pesquisando > {}", filtro );
         
-        Page<Peca> pagina = repository.pesquisar( filtro, pageable );
+        Page<PecaPesquisaDTO> pagina = repository.pesquisar( filtro, pageable );
         
         return pagina;
     }

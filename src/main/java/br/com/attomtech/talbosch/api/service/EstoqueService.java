@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import br.com.attomtech.talbosch.api.dto.EstoquePesquisaDTO;
+import br.com.attomtech.talbosch.api.dto.pesquisa.EstoquePesquisaDTO;
 import br.com.attomtech.talbosch.api.exception.NegocioException;
 import br.com.attomtech.talbosch.api.jasper.JasperUtils;
 import br.com.attomtech.talbosch.api.log.EstoqueLog;

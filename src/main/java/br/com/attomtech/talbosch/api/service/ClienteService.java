@@ -1,6 +1,5 @@
 package br.com.attomtech.talbosch.api.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -16,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import br.com.attomtech.talbosch.api.dto.ClienteDTO;
+import br.com.attomtech.talbosch.api.dto.pesquisa.ClientePesquisaDTO;
 import br.com.attomtech.talbosch.api.exception.NegocioException;
 import br.com.attomtech.talbosch.api.log.ClienteLog;
 import br.com.attomtech.talbosch.api.model.Cliente;
@@ -46,12 +46,12 @@ public class ClienteService extends AuditoriaService<Cliente> implements Negocio
     }
     
     @Override
-    public Page<Cliente> pesquisar( ClienteFilter filtro, Pageable pageable )
+    public Page<ClientePesquisaDTO> pesquisar( ClienteFilter filtro, Pageable pageable )
     {
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Pesquisando > {}", filtro );
         
-        Page<Cliente> pagina = repository.pesquisar( filtro, pageable );
+        Page<ClientePesquisaDTO> pagina = repository.pesquisar( filtro, pageable );
         
         return pagina;
     }
@@ -59,10 +59,7 @@ public class ClienteService extends AuditoriaService<Cliente> implements Negocio
     @Cacheable(value = "clientesTodos")
     public List<ClienteDTO> buscarTodosClientes( )
     {
-        List<Cliente> clientes = repository.findAll( );
-        List<ClienteDTO> resultado = new ArrayList<ClienteDTO>( );
-        
-        clientes.forEach( cliente -> resultado.add( new ClienteDTO( cliente ) ) );
+        List<ClienteDTO> resultado = repository.buscarTodos( );
         
         return resultado;
     }

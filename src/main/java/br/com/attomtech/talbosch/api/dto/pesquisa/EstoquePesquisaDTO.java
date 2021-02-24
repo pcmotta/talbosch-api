@@ -1,4 +1,4 @@
-package br.com.attomtech.talbosch.api.dto;
+package br.com.attomtech.talbosch.api.dto.pesquisa;
 
 import java.time.LocalDate;
 

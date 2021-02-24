@@ -3,6 +3,7 @@ package br.com.attomtech.talbosch.api.repository.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.criteria.CompoundSelection;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -11,16 +12,23 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.StringUtils;
 
+import br.com.attomtech.talbosch.api.dto.pesquisa.PecaPesquisaDTO;
 import br.com.attomtech.talbosch.api.model.Peca;
 import br.com.attomtech.talbosch.api.repository.filter.PecaFilter;
 import br.com.attomtech.talbosch.api.repository.query.PecaRepositoryQuery;
 
-public class PecaRepositoryImpl extends RepositoryImpl<PecaFilter, Peca> implements PecaRepositoryQuery
+public class PecaRepositoryImpl extends RepositoryImplDto<PecaFilter, Peca, PecaPesquisaDTO> implements PecaRepositoryQuery
 {
     @Override
-    public Page<Peca> pesquisar( PecaFilter filtro, Pageable pageable )
+    public Page<PecaPesquisaDTO> pesquisar( PecaFilter filtro, Pageable pageable )
     {
-        return pesquisarDados( filtro, pageable, PecaFilter.CODIGO );
+        return pesquisarDadosDto( filtro, pageable, PecaFilter.CODIGO );
+    }
+    
+    @Override
+    protected CompoundSelection<PecaPesquisaDTO> select( CriteriaBuilder builder, Root<Peca> from )
+    {
+        return builder.construct( PecaPesquisaDTO.class, from.get( "codigo" ), from.get( "descricao" ), from.get( "aparelho" ) );
     }
 
     @Override

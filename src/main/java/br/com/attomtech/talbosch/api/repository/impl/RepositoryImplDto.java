@@ -1,6 +1,7 @@
 package br.com.attomtech.talbosch.api.repository.impl;
 
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CompoundSelection;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -30,7 +31,7 @@ public abstract class RepositoryImplDto<T, X extends Model, D extends Model> ext
         CriteriaQuery<D> query   = builder.createQuery( classeDto );
         Root<X>          from    = query.from( classe );
         
-        select( builder, query, from );
+        query.select( select( builder, from ) );
         query.where( filtrar( filtro, builder, from ) );
         adicionarOrdenacao( pageable, builder, query, from, order, isAsc );
         
@@ -40,5 +41,5 @@ public abstract class RepositoryImplDto<T, X extends Model, D extends Model> ext
         return new PageImpl<>( typed.getResultList( ), pageable, total( filtro ) );
     }
     
-    protected abstract void select( CriteriaBuilder builder, CriteriaQuery<D> query, Root<X> from );
+    protected abstract CompoundSelection<D> select( CriteriaBuilder builder, Root<X> from );
 }

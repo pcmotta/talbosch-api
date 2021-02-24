@@ -1,6 +1,5 @@
 package br.com.attomtech.talbosch.api.dto;
 
-import br.com.attomtech.talbosch.api.model.Cliente;
 import br.com.attomtech.talbosch.api.model.enums.TipoPessoa;
 
 public class ClienteDTO
@@ -11,13 +10,13 @@ public class ClienteDTO
     private TipoPessoa tipo;
     private boolean    ativo;
 
-    public ClienteDTO( Cliente cliente )
+    public ClienteDTO( Long codigo, String nome, Long documento, TipoPessoa tipo, boolean ativo )
     {
-        this.codigo = cliente.getCodigo( );
-        this.nome = cliente.getNome( );
-        this.documento = cliente.getCpfCnpj( );
-        this.tipo = cliente.getTipoPessoa( );
-        this.ativo = cliente.isAtivo( );
+        this.codigo = codigo;
+        this.nome = nome;
+        this.documento = documento;
+        this.tipo = tipo;
+        this.ativo = ativo;
     }
 
     public Long getCodigo( )

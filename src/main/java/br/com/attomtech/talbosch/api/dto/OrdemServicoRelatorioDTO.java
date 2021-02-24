@@ -32,7 +32,6 @@ public class OrdemServicoRelatorioDTO
     public OrdemServicoRelatorioDTO( OrdemServico ordem )
     {
         this.dataChamada = ordem.getDataChamada( );
-        this.dataAtendimento = ordem.getDataAtendimento( );
         this.classificacao = ordem.getTipo( );
         this.atendente = ordem.getAtendente( );
         this.cliente = ordem.getCliente( );
@@ -42,6 +41,9 @@ public class OrdemServicoRelatorioDTO
         this.endereco = ordem.getEndereco( );
         this.produto = ordem.getProduto( );
         this.observacao = ordem.getObservacao( );
+
+        this.dataAtendimento = ordem.getDataAtendimento( ) != null ? ordem.getDataAtendimento( ) :
+            ordem.getAtendimentos( ).stream( ).map( a -> a.getDataAtendimento( ) ).min( (a1, a2) -> a1.compareTo( a2 ) ).get( );
         
         ordem.getPecas( ).stream( ).collect( Collectors.groupingBy( p -> p.getPeca( ) ) )
             .forEach( (peca, pecas) -> {

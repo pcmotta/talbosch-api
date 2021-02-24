@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import br.com.attomtech.talbosch.api.dto.pesquisa.PedidoPesquisaDTO;
 import br.com.attomtech.talbosch.api.exception.NegocioException;
 import br.com.attomtech.talbosch.api.filter.PedidoFilter;
 import br.com.attomtech.talbosch.api.log.PedidoLog;
@@ -46,12 +47,12 @@ public class PedidoService extends AuditoriaService<Pedido> implements NegocioSe
     }
 
     @Override
-    public Page<Pedido> pesquisar( PedidoFilter filtro, Pageable pageable )
+    public Page<PedidoPesquisaDTO> pesquisar( PedidoFilter filtro, Pageable pageable )
     {
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Pesquisando > {}", filtro );
         
-        Page<Pedido> pagina = repository.pesquisar( filtro, pageable );
+        Page<PedidoPesquisaDTO> pagina = repository.pesquisar( filtro, pageable );
         
         return pagina;
     }
