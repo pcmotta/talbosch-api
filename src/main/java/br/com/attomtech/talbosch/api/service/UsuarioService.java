@@ -88,7 +88,7 @@ public class UsuarioService extends AuditoriaService<Usuario> implements Negocio
         return usuarioSalvo;
     }
     
-    @Caching(evict = { @CacheEvict(key = "#usuario.codigo"), @CacheEvict(key = "'todos'") })
+    @Caching(evict = { @CacheEvict(key = "#usuario.codigo"), @CacheEvict(key = "'todos'"), @CacheEvict(key = "#login") })
     @Override
     public Usuario atualizar( Usuario usuario, String login )
     {
@@ -141,7 +141,7 @@ public class UsuarioService extends AuditoriaService<Usuario> implements Negocio
         return usuario;
     }
     
-    @Caching(evict = { @CacheEvict(key = "#codigo"), @CacheEvict(key = "'todos'") })
+    @Caching(evict = { @CacheEvict(key = "#codigo"), @CacheEvict(key = "'todos'"), @CacheEvict(key = "#login") })
     @Override
     public void excluir( Long codigo, String login )
     {
