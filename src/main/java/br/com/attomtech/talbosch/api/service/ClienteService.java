@@ -7,6 +7,7 @@ import java.util.stream.IntStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -29,6 +30,7 @@ import br.com.attomtech.talbosch.api.service.interfaces.NegocioServiceAuditoria;
 import br.com.attomtech.talbosch.api.utils.LabelValue;
 
 @Service
+@CacheConfig(cacheNames = "clientes")
 public class ClienteService extends AuditoriaService<Cliente> implements NegocioServiceAuditoria<Cliente, ClienteFilter, Long>
 {
     private static final Logger LOGGER = LoggerFactory.getLogger( ClienteService.class );
@@ -56,7 +58,7 @@ public class ClienteService extends AuditoriaService<Cliente> implements Negocio
         return pagina;
     }
     
-    @Cacheable(value = "clientesTodos")
+    @Cacheable(key = "'todos'")
     public List<ClienteDTO> buscarTodosClientes( )
     {
         List<ClienteDTO> resultado = repository.buscarTodos( );
@@ -65,6 +67,7 @@ public class ClienteService extends AuditoriaService<Cliente> implements Negocio
     }
     
     @Override
+    @CacheEvict(key = "'todos'")
     public Cliente cadastrar( Cliente cliente, String login )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -101,7 +104,7 @@ public class ClienteService extends AuditoriaService<Cliente> implements Negocio
         return cliente;
     }
     
-    @Caching(evict = { @CacheEvict(value = "cliente", key = "#cliente.codigo"), @CacheEvict(value = "clientesTodos", allEntries = true) })
+    @Caching(evict = { @CacheEvict(key = "#cliente.codigo"), @CacheEvict(key = "'todos'") })
     @Override
     public Cliente atualizar( Cliente cliente, String login )
     {
@@ -124,7 +127,7 @@ public class ClienteService extends AuditoriaService<Cliente> implements Negocio
         return cliente;
     }
     
-    @Caching(evict = { @CacheEvict(value = "cliente", key = "#codigo"), @CacheEvict(value = "clientesTodos", allEntries = true) })
+    @Caching(evict = { @CacheEvict(key = "#codigo"), @CacheEvict(key = "'todos'") })
     @Override
     public void excluir( Long codigo, String login )
     {
@@ -149,7 +152,7 @@ public class ClienteService extends AuditoriaService<Cliente> implements Negocio
         return repository.save( cliente );
     }
     
-    @Cacheable(value = "cliente", key = "#codigo")
+    @Cacheable(key = "#codigo")
     @Override
     public Cliente buscarPorCodigo( Long codigo )
     {
@@ -161,7 +164,7 @@ public class ClienteService extends AuditoriaService<Cliente> implements Negocio
         return clienteSalvo;
     }
     
-    @Cacheable(value = "tiposPessoa")
+    @Cacheable(key = "#root.methodName")
     public LabelValue[] buscarTiposPessoa( )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -176,7 +179,7 @@ public class ClienteService extends AuditoriaService<Cliente> implements Negocio
         return values;
     }
     
-    @Cacheable(value = "tiposCliente")
+    @Cacheable(key = "#root.methodName")
     public LabelValue[] buscarTiposCliente( )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -191,7 +194,7 @@ public class ClienteService extends AuditoriaService<Cliente> implements Negocio
         return values;
     }
     
-    @Cacheable(value = "generos")
+    @Cacheable(key = "#root.methodName")
     public LabelValue[] buscarGeneros( )
     {
         if( LOGGER.isDebugEnabled( ) )

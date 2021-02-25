@@ -10,6 +10,7 @@ import javax.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -30,6 +31,7 @@ import br.com.attomtech.talbosch.api.service.interfaces.NegocioServiceAuditoria;
 import br.com.attomtech.talbosch.api.utils.LabelValue;
 
 @Service
+@CacheConfig(cacheNames = "pedidos")
 public class PedidoService extends AuditoriaService<Pedido> implements NegocioServiceAuditoria<Pedido, PedidoFilter, Long>
 {
     private static final Logger LOGGER = LoggerFactory.getLogger( PedidoService.class );
@@ -90,7 +92,7 @@ public class PedidoService extends AuditoriaService<Pedido> implements NegocioSe
     }
 
     
-    @CacheEvict(value = "pedido", key = "#pedido.codigo")
+    @CacheEvict(key = "#pedido.codigo")
     @Override
     @Transactional(rollbackOn = NegocioException.class)
     public Pedido atualizar( Pedido pedido, String login )
@@ -162,7 +164,7 @@ public class PedidoService extends AuditoriaService<Pedido> implements NegocioSe
         }
     }
 
-    @CacheEvict(value = "pedido", key = "#codigo")
+    @CacheEvict(key = "#codigo")
     @Override
     @Transactional(rollbackOn = NegocioException.class)
     public void excluir( Long codigo, String login )
@@ -188,7 +190,7 @@ public class PedidoService extends AuditoriaService<Pedido> implements NegocioSe
         }
     }
 
-    @Cacheable(value = "pedido", key = "#codigo")
+    @Cacheable(key = "#codigo")
     @Override
     public Pedido buscarPorCodigo( Long codigo )
     {
@@ -214,7 +216,7 @@ public class PedidoService extends AuditoriaService<Pedido> implements NegocioSe
         return repository.save( pedido );
     }
     
-    @Cacheable(value = "statusPedido")
+    @Cacheable(key = "#root.methodName")
     public LabelValue[] buscarStatus( )
     {
         if( LOGGER.isDebugEnabled( ) )

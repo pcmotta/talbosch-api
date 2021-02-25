@@ -14,6 +14,7 @@ import javax.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -41,6 +42,7 @@ import br.com.attomtech.talbosch.api.utils.LabelValue;
 import net.sf.jasperreports.engine.JRException;
 
 @Service
+@CacheConfig(cacheNames = "ordensDeServico")
 public class OrdemServicoService extends AuditoriaService<OrdemServico> implements NegocioServiceAuditoria<OrdemServico, OrdemServicoFilter, Long>
 {
     private static final Logger LOGGER = LoggerFactory.getLogger( OrdemServicoService.class );
@@ -73,7 +75,7 @@ public class OrdemServicoService extends AuditoriaService<OrdemServico> implemen
         return repository.pesquisar( filtro, pageable );
     }
 
-    @Cacheable(value = "ordemServico", key = "#codigo")
+    @Cacheable(key = "#codigo")
     @Override
     public OrdemServico buscarPorCodigo( Long codigo )
     {
@@ -134,7 +136,7 @@ public class OrdemServicoService extends AuditoriaService<OrdemServico> implemen
             });
     }
     
-    @CacheEvict(value = "ordemServico", key = "#ordem.numero")
+    @CacheEvict(key = "#ordem.numero")
     @Override
     @Transactional(rollbackOn = NegocioException.class)
     public OrdemServico atualizar( OrdemServico ordem, String login )
@@ -186,7 +188,7 @@ public class OrdemServicoService extends AuditoriaService<OrdemServico> implemen
         return ordem;
     }
 
-    @CacheEvict(value = "ordemServico", key = "#numero")
+    @CacheEvict(key = "#numero")
     @Override
     public void excluir( Long numero, String login )
     {
@@ -215,7 +217,7 @@ public class OrdemServicoService extends AuditoriaService<OrdemServico> implemen
         return ordens;
     }
     
-    @Cacheable(value = "statusOrdem")
+    @Cacheable(key = "#root.methodName")
     public List<LabelValue> buscarStatus( )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -231,7 +233,7 @@ public class OrdemServicoService extends AuditoriaService<OrdemServico> implemen
         return labelValue;
     }
     
-    @Cacheable(value = "tiposOrdem")
+    @Cacheable(key = "#root.methodName")
     public LabelValue[] buscarTipos( )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -246,7 +248,7 @@ public class OrdemServicoService extends AuditoriaService<OrdemServico> implemen
         return labelValue;
     }
     
-    @Cacheable(value = "tiposValor")
+    @Cacheable(key = "#root.methodName")
     public LabelValue[] buscarTiposValor( )
     {
         if( LOGGER.isDebugEnabled( ) )

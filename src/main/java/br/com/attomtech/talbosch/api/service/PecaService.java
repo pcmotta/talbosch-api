@@ -8,6 +8,7 @@ import java.util.stream.IntStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -29,6 +30,7 @@ import br.com.attomtech.talbosch.api.service.interfaces.NegocioServiceAuditoria;
 import br.com.attomtech.talbosch.api.utils.LabelValue;
 
 @Service
+@CacheConfig(cacheNames = "pecas")
 public class PecaService extends AuditoriaService<Peca> implements NegocioServiceAuditoria<Peca, PecaFilter, String>
 {
     private static final Logger LOGGER = LoggerFactory.getLogger( PecaService.class );
@@ -54,7 +56,7 @@ public class PecaService extends AuditoriaService<Peca> implements NegocioServic
         return pagina;
     }
     
-    @Cacheable(value = "pecasTodas")
+    @Cacheable(key = "'todas'")
     public List<PecaDTO> buscarPecas( )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -65,6 +67,7 @@ public class PecaService extends AuditoriaService<Peca> implements NegocioServic
         return pecas.stream( ).map( peca -> new PecaDTO( peca ) ).collect( Collectors.toList( ) );
     }
     
+    @CacheEvict(key = "'todas'")
     @Override
     public Peca cadastrar( Peca peca, String login )
     {
@@ -82,7 +85,7 @@ public class PecaService extends AuditoriaService<Peca> implements NegocioServic
         return peca;
     }
     
-    @Caching(evict = { @CacheEvict(value = "peca", key = "#peca.codigo"), @CacheEvict(value = "pecasTodas", allEntries = true) })
+    @Caching(evict = { @CacheEvict(key = "#peca.codigo"), @CacheEvict(key = "'todas'") })
     @Override
     public Peca atualizar( Peca peca, String login )
     {
@@ -103,7 +106,7 @@ public class PecaService extends AuditoriaService<Peca> implements NegocioServic
         return peca;
     }
     
-    @Caching(evict = { @CacheEvict(value = "peca", key = "#codigo"), @CacheEvict(value = "pecasTodas", allEntries = true) })
+    @Caching(evict = { @CacheEvict(key = "#codigo"), @CacheEvict(key = "'todas'") })
     @Override
     public void excluir( String codigo, String login )
     {
@@ -130,7 +133,7 @@ public class PecaService extends AuditoriaService<Peca> implements NegocioServic
         return pecaSalva;
     }
     
-    @Cacheable(value = "peca", key = "#codigo")
+    @Cacheable(key = "#codigo")
     @Override
     public Peca buscarPorCodigo( String codigo )
     {
@@ -139,7 +142,7 @@ public class PecaService extends AuditoriaService<Peca> implements NegocioServic
         return pecaOpt.orElseThrow( ( ) -> new NegocioException( "Peça não encontrada" ) );
     }
     
-    @Cacheable(value = "aparelhos")
+    @Cacheable(key = "#root.methodName")
     public LabelValue[] buscarAparelhos( )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -154,7 +157,7 @@ public class PecaService extends AuditoriaService<Peca> implements NegocioServic
         return values;
     }
     
-    @Cacheable(value = "fabricantes")
+    @Cacheable(key = "#root.methodName")
     public LabelValue[] buscarFabricantes( )
     {
         if( LOGGER.isDebugEnabled( ) )

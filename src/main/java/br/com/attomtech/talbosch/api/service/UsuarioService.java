@@ -8,6 +8,7 @@ import java.util.stream.IntStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -29,6 +30,7 @@ import br.com.attomtech.talbosch.api.service.interfaces.NegocioServiceAuditoria;
 import br.com.attomtech.talbosch.api.utils.LabelValue;
 
 @Service
+@CacheConfig(cacheNames = "usuarios")
 public class UsuarioService extends AuditoriaService<Usuario> implements NegocioServiceAuditoria<Usuario, UsuarioFilter, Long>
 {
     private static final Logger LOGGER = LoggerFactory.getLogger( UsuarioService.class );
@@ -55,7 +57,7 @@ public class UsuarioService extends AuditoriaService<Usuario> implements Negocio
         return pagina;
     }
     
-    @Cacheable(value = "todosUsuarios")
+    @Cacheable(key = "'todos'")
     public List<UsuarioDTO> buscarUsuarios( )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -70,6 +72,7 @@ public class UsuarioService extends AuditoriaService<Usuario> implements Negocio
         return usuariosDto;
     }
     
+    @CacheEvict(key = "'todos'")
     @Override
     public Usuario cadastrar( Usuario usuario, String login )
     {
@@ -85,7 +88,7 @@ public class UsuarioService extends AuditoriaService<Usuario> implements Negocio
         return usuarioSalvo;
     }
     
-    @Caching(evict = { @CacheEvict(value = "usuario", key = "#usuario.codigo"), @CacheEvict(value = "todosUsuarios", allEntries = true) })
+    @Caching(evict = { @CacheEvict(key = "#usuario.codigo"), @CacheEvict(key = "'todos'") })
     @Override
     public Usuario atualizar( Usuario usuario, String login )
     {
@@ -112,6 +115,7 @@ public class UsuarioService extends AuditoriaService<Usuario> implements Negocio
         return usuario;
     }
     
+    @CacheEvict(key = "'todos'")
     public Usuario atualizarProprioUsuario( Usuario usuario, String login )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -137,7 +141,7 @@ public class UsuarioService extends AuditoriaService<Usuario> implements Negocio
         return usuario;
     }
     
-    @Caching(evict = { @CacheEvict(value = "usuario", key = "#codigo"), @CacheEvict(value = "todosUsuarios", allEntries = true) })
+    @Caching(evict = { @CacheEvict(key = "#codigo"), @CacheEvict(key = "'todos'") })
     @Override
     public void excluir( Long codigo, String login )
     {
@@ -155,7 +159,7 @@ public class UsuarioService extends AuditoriaService<Usuario> implements Negocio
         usuarioLog.logar( AcaoLog.EXCLUSAO, codigo, usuario );
     }
     
-    @Cacheable(value = "usuario", key = "#codigo")
+    @Cacheable(key = "#codigo")
     @Override
     public Usuario buscarPorCodigo( Long codigo )
     {
@@ -185,7 +189,7 @@ public class UsuarioService extends AuditoriaService<Usuario> implements Negocio
         return usuarioOpt.orElseThrow( ( ) -> new NegocioException( "Usuário não encontrado" ) );
     }
     
-    @Cacheable(value = "permissoes", key = "#login")
+    @Cacheable(key = "#login")
     public LabelValue[] buscarPermissoes( String login )
     {
         if( LOGGER.isDebugEnabled( ) )

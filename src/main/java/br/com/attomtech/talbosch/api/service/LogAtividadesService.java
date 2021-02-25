@@ -6,6 +6,7 @@ import java.util.stream.IntStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +24,7 @@ import br.com.attomtech.talbosch.api.utils.LabelValue;
 import br.com.attomtech.talbosch.api.utils.Utils;
 
 @Service
+@CacheConfig(cacheNames = "log")
 public class LogAtividadesService
 {
     private static final Logger LOGGER = LoggerFactory.getLogger( LogAtividadesService.class );
@@ -54,7 +56,7 @@ public class LogAtividadesService
         repository.save( log );
     }
     
-    @Cacheable(value = "log", key = "#codigo")
+    @Cacheable(key = "#codigo")
     public LogAtividades buscar( Long codigo )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -65,7 +67,7 @@ public class LogAtividadesService
         return log.orElseThrow( () -> new NegocioException( "Log não encontrado" ) );
     }
     
-    @Cacheable(value = "areasLog")
+    @Cacheable(key = "#root.methodName")
     public LabelValue[] buscarAreas( )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -81,7 +83,7 @@ public class LogAtividadesService
         return resultado;
     }
      
-    @Cacheable(value = "acoesLog")
+    @Cacheable(key = "#root.methodName")
     public LabelValue[] buscarAcoes( )
     {
         if( LOGGER.isDebugEnabled( ) )

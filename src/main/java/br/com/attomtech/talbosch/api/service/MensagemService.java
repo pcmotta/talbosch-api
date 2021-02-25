@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -22,6 +23,7 @@ import br.com.attomtech.talbosch.api.service.interfaces.NegocioServiceAuditoria;
 import br.com.attomtech.talbosch.api.utils.Utils;
 
 @Service
+@CacheConfig(cacheNames = "mensagens")
 public class MensagemService implements NegocioServiceAuditoria<Mensagem, MensagemFilter, Long>
 {
     private static final Logger LOGGER = LoggerFactory.getLogger( MensagemService.class );
@@ -49,7 +51,7 @@ public class MensagemService implements NegocioServiceAuditoria<Mensagem, Mensag
         return repository.pesquisar( filtro, pageable );
     }
     
-    @Cacheable(value = "mensagensNaoLidas", key = "#login")
+    @Cacheable(key = "#login")
     public int buscarNaoLidas( String login )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -60,7 +62,7 @@ public class MensagemService implements NegocioServiceAuditoria<Mensagem, Mensag
         return naoLidas;
     }
 
-    @CacheEvict(value = "mensagensNaoLidas", key = "#mensagem.usuarioDestino.login")
+    @CacheEvict(key = "#mensagem.usuarioDestino.login")
     @Override
     public Mensagem cadastrar( Mensagem mensagem, String login )
     {
@@ -82,7 +84,7 @@ public class MensagemService implements NegocioServiceAuditoria<Mensagem, Mensag
         return null;
     }
     
-    @CacheEvict(value = "mensagensNaoLidas", key = "#login")
+    @CacheEvict(key = "#login")
     public Mensagem ler( Long codigo, String login )
     {
         Mensagem mensagem = buscarPorCodigo( codigo );
@@ -102,7 +104,7 @@ public class MensagemService implements NegocioServiceAuditoria<Mensagem, Mensag
         return mensagem;
     }
 
-    @Cacheable(value = "mensagem", key = "#codigo")
+    @Cacheable(key = "#codigo")
     @Override
     public Mensagem buscarPorCodigo( Long codigo )
     {
@@ -114,7 +116,7 @@ public class MensagemService implements NegocioServiceAuditoria<Mensagem, Mensag
         return mensagem.orElseThrow( ( ) -> new NegocioException( "Mensagem não encontrada" ) );
     }
 
-    @Caching(evict = { @CacheEvict(value = "mensagem", key = "#codigo"), @CacheEvict(value = "mensagensNaoLidas", key = "#login") })
+    @Caching(evict = { @CacheEvict(key = "#codigo"), @CacheEvict(key = "#login") })
     @Override
     public void excluir( Long codigo, String login )
     {

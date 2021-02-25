@@ -12,6 +12,7 @@ import java.util.stream.IntStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -37,6 +38,7 @@ import br.com.attomtech.talbosch.api.service.interfaces.NegocioServiceAuditoriaD
 import br.com.attomtech.talbosch.api.utils.LabelValue;
 
 @Service
+@CacheConfig(cacheNames = "estoque")
 public class EstoqueService extends AuditoriaService<Estoque> implements NegocioServiceAuditoriaDto<Estoque, EstoqueFilter, EstoquePesquisaDTO, Long>
 {
     private static final Logger LOGGER = LoggerFactory.getLogger( EstoqueService.class );
@@ -99,7 +101,7 @@ public class EstoqueService extends AuditoriaService<Estoque> implements Negocio
     }
 
     @Transactional(rollbackFor = NegocioException.class)
-    @Cacheable(value = "estoqueItem", key = "#estoque.codigo")
+    @CacheEvict(key = "#estoque.codigo")
     @Override
     public Estoque atualizar( Estoque estoque, String login )
     {
@@ -150,7 +152,7 @@ public class EstoqueService extends AuditoriaService<Estoque> implements Negocio
         }
     }
 
-    @CacheEvict(value = "estoqueItem", key = "#codigo")
+    @CacheEvict(key = "#codigo")
     @Override
     public void excluir( Long codigo, String login )
     {
@@ -166,7 +168,7 @@ public class EstoqueService extends AuditoriaService<Estoque> implements Negocio
         notificar( estoque, null, login );
     }
 
-    @Cacheable(value = "estoqueItem", key = "#codigo")
+    @Cacheable(key = "#codigo")
     @Override
     public Estoque buscarPorCodigo( Long codigo )
     {
@@ -187,7 +189,7 @@ public class EstoqueService extends AuditoriaService<Estoque> implements Negocio
         return repository.save( estoque );
     }
     
-    @Cacheable(value = "tiposEstoque")
+    @Cacheable(key = "#root.methodName")
     public LabelValue[] buscarTipos( )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -201,7 +203,7 @@ public class EstoqueService extends AuditoriaService<Estoque> implements Negocio
         return labelValue;
     }
     
-    @Cacheable(value = "statusEstoque")
+    @Cacheable(key = "#root.methodName")
     public List<LabelValue> buscarStatus( )
     {
         if( LOGGER.isDebugEnabled( ) )

@@ -7,7 +7,6 @@ import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -155,7 +154,6 @@ public class ClienteController implements NegocioControllerAuditoria<Cliente, Cl
         return ResponseEntity.ok( values );
     }
     
-    @Cacheable(value = "generos")
     @GetMapping("/generos")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<LabelValue[]> buscarGeneros( )
@@ -174,6 +172,8 @@ public class ClienteController implements NegocioControllerAuditoria<Cliente, Cl
     {
         if( LOGGER.isDebugEnabled( ) )
             LOGGER.debug( "Buscando Clientes" );
+        
+        System.out.println( "TODOS" );
         
         List<ClienteDTO> clientes = service.buscarTodosClientes( );
         

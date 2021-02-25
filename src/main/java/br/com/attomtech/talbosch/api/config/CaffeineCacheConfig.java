@@ -27,7 +27,6 @@ public class CaffeineCacheConfig
                 .initialCapacity( 100 )
                 .maximumSize( 500 )
                 .expireAfterAccess( 15, TimeUnit.MINUTES )
-                .weakKeys( )
                 .recordStats( );
     }
 }

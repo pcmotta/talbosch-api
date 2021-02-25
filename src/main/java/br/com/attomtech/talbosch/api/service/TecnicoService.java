@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -24,6 +25,7 @@ import br.com.attomtech.talbosch.api.service.interfaces.NegocioServiceAuditoria;
 import br.com.attomtech.talbosch.api.utils.LabelValue;
 
 @Service
+@CacheConfig(cacheNames = "tecnicos")
 public class TecnicoService extends AuditoriaService<Tecnico> implements NegocioServiceAuditoria<Tecnico, TecnicoFilter, Long>
 {
     private static final Logger LOGGER = LoggerFactory.getLogger( TecnicoService.class );
@@ -49,7 +51,7 @@ public class TecnicoService extends AuditoriaService<Tecnico> implements Negocio
         return pagina;
     }
     
-    @Cacheable(value = "tecnicosAtivos")
+    @Cacheable(key = "'ativos'")
     public List<LabelValue> buscarAtivos( )
     {
         if( LOGGER.isDebugEnabled( ) )
@@ -63,6 +65,7 @@ public class TecnicoService extends AuditoriaService<Tecnico> implements Negocio
         return tecnicosAtivos;
     }
     
+    @CacheEvict(key = "'ativos'")
     @Override
     public Tecnico cadastrar( Tecnico tecnico, String login )
     {
@@ -77,7 +80,7 @@ public class TecnicoService extends AuditoriaService<Tecnico> implements Negocio
         return tecnico;
     }
     
-    @Caching(evict = { @CacheEvict(value = "tecnico", key = "#tecnico.codigo"), @CacheEvict(value = "tecnicosAtivos", allEntries = true) })
+    @Caching(evict = { @CacheEvict(key = "#tecnico.codigo"), @CacheEvict(key = "'ativos'") })
     @Override
     public Tecnico atualizar( Tecnico tecnico, String login )
     {
@@ -99,7 +102,7 @@ public class TecnicoService extends AuditoriaService<Tecnico> implements Negocio
         return tecnico;
     }
     
-    @Caching(evict = { @CacheEvict(value = "tecnico", key = "#codigo"), @CacheEvict(value = "tecnicosAtivos", allEntries = true) })
+    @Caching(evict = { @CacheEvict(key = "#codigo"), @CacheEvict(key = "'ativos'") })
     @Override
     public void excluir( Long codigo, String login )
     {
@@ -115,7 +118,7 @@ public class TecnicoService extends AuditoriaService<Tecnico> implements Negocio
         log.logar( AcaoLog.EXCLUSAO, codigo, tecnico );
     }
 
-    @Cacheable(value = "tecnico", key = "#codigo")
+    @Cacheable(key = "#codigo")
     @Override
     public Tecnico buscarPorCodigo( Long codigo )
     {
