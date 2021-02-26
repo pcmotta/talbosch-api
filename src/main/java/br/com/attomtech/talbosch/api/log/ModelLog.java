@@ -88,7 +88,7 @@ public abstract class ModelLog<T extends Model>
     
     protected String formatarDocumento( Long documento, boolean isPessoaFisica )
     {
-        if( documento == null )
+        if( documento == null || documento == 0 )
             return null;
         
         String strDocumento = documento.toString( );
