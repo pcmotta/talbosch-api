@@ -10,6 +10,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaBuilder.In;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -36,8 +37,8 @@ public class EstoqueRepositoryImpl extends RepositoryImplDto<EstoqueFilter, Esto
     protected CompoundSelection<EstoquePesquisaDTO> select( CriteriaBuilder builder, Root<Estoque> from )
     {
         Join<Object, Object> peca = from.join( EstoqueFilter.PECA );
-        Join<Object, Object> cliente = from.join( EstoqueFilter.CLIENTE );
-        Join<Object, Object> ordemServico = from.join( EstoqueFilter.OS );
+        Join<Object, Object> cliente = from.join( EstoqueFilter.CLIENTE, JoinType.LEFT );
+        Join<Object, Object> ordemServico = from.join( EstoqueFilter.OS, JoinType.LEFT );
         
         return builder.construct( EstoquePesquisaDTO.class, from.get( "codigo" ),
                 peca.get( "codigo" ), peca.get( "descricao" ), cliente.get( "nome" ), ordemServico.get( "numero" ),
