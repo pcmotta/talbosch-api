@@ -4,17 +4,21 @@ import java.time.LocalDate;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import br.com.attomtech.talbosch.api.model.Cliente;
+import br.com.attomtech.talbosch.api.model.OrdemServico;
 import br.com.attomtech.talbosch.api.model.Usuario;
 import br.com.attomtech.talbosch.api.model.enums.StatusPedido;
 
 public class PedidoFilter
 {
-    public static final String CODIGO     = "codigo",
-                               PEDIDO     = "pedido",
-                               NOTAFISCAL = "notaFiscal",
-                               DATA       = "data",
-                               PEDIDOPOR  = "pedidoPor",
-                               STATUS     = "status";
+    public static final String CODIGO       = "codigo",
+                               PEDIDO       = "pedido",
+                               NOTAFISCAL   = "notaFiscal",
+                               DATA         = "data",
+                               PEDIDOPOR    = "pedidoPor",
+                               STATUS       = "status",
+                               CLIENTE      = "cliente",
+                               ORDEMSERVICO = "ordemServico";
     
     private Long   codigo;
     private String pedido;
@@ -27,6 +31,8 @@ public class PedidoFilter
     private LocalDate dataAte;
     private Usuario pedidoPor;
     private StatusPedido status;
+    private Cliente cliente;
+    private OrdemServico ordemServico;
 
     public Long getCodigo( )
     {
@@ -96,6 +102,26 @@ public class PedidoFilter
     public void setStatus( StatusPedido status )
     {
         this.status = status;
+    }
+
+    public Cliente getCliente( )
+    {
+        return cliente;
+    }
+
+    public OrdemServico getOrdemServico( )
+    {
+        return ordemServico;
+    }
+
+    public void setCliente( Cliente cliente )
+    {
+        this.cliente = cliente;
+    }
+
+    public void setOrdemServico( OrdemServico ordem )
+    {
+        this.ordemServico = ordem;
     }
 
 }

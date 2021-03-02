@@ -13,14 +13,18 @@ public class PedidoPesquisaDTO implements Model
     private LocalDate  data;
     private LabelValue status;
     private String     pedidoPor;
+    private String     cliente;
+    private Long       ordemServico;
     
-    public PedidoPesquisaDTO( Long codigo, String pedido, LocalDate data, StatusPedido status, String pedidoPor )
+    public PedidoPesquisaDTO( Long codigo, String pedido, LocalDate data, StatusPedido status, String pedidoPor, String cliente, Long ordemServico )
     {
         this.codigo = codigo;
         this.pedido = pedido;
         this.data = data;
         this.status = new LabelValue( status.toString( ), status.getDescricao( ) );
         this.pedidoPor = pedidoPor;
+        this.cliente = cliente;
+        this.ordemServico = ordemServico;
     }
 
     public Long getCodigo( )
@@ -71,5 +75,25 @@ public class PedidoPesquisaDTO implements Model
     public void setPedidoPor( String pedidoPor )
     {
         this.pedidoPor = pedidoPor;
+    }
+
+    public String getCliente( )
+    {
+        return cliente;
+    }
+
+    public Long getOrdemServico( )
+    {
+        return ordemServico;
+    }
+
+    public void setCliente( String cliente )
+    {
+        this.cliente = cliente;
+    }
+
+    public void setOrdemServico( Long ordemServico )
+    {
+        this.ordemServico = ordemServico;
     }
 }

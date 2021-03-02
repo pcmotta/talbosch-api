@@ -46,6 +46,14 @@ public class Pedido extends Model implements Cloneable
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "chegada_nota_fiscal")
     private LocalDate chegadaNotaFiscal;
+    
+    @ManyToOne
+    @JoinColumn(name = "codigo_cliente")
+    private Cliente cliente;
+    
+    @ManyToOne
+    @JoinColumn(name = "ordem_servico")
+    private OrdemServico ordemServico;
 
     @NotNull(message = "Pedido Por é obrigatório")
     @JsonIgnoreProperties(value = { "login", "ultimoAcesso", "ativo", "permissoes", "auditoria" })
@@ -127,6 +135,26 @@ public class Pedido extends Model implements Cloneable
     public void setChegadaNotaFiscal( LocalDate chegadaNotaFiscal )
     {
         this.chegadaNotaFiscal = chegadaNotaFiscal;
+    }
+
+    public Cliente getCliente( )
+    {
+        return cliente;
+    }
+
+    public OrdemServico getOrdemServico( )
+    {
+        return ordemServico;
+    }
+
+    public void setCliente( Cliente cliente )
+    {
+        this.cliente = cliente;
+    }
+
+    public void setOrdemServico( OrdemServico ordem )
+    {
+        this.ordemServico = ordem;
     }
 
     public void setPedidoPor( Usuario pedidoPor )

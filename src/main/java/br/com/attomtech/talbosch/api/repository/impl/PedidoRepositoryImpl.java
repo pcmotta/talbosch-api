@@ -6,6 +6,7 @@ import java.util.List;
 import javax.persistence.criteria.CompoundSelection;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -29,9 +30,11 @@ public class PedidoRepositoryImpl extends RepositoryImplDto<PedidoFilter, Pedido
     protected CompoundSelection<PedidoPesquisaDTO> select( CriteriaBuilder builder, Root<Pedido> from )
     {
         Join<Object, Object> pedidoPor = from.join( "pedidoPor" );
+        Join<Object, Object> cliente = from.join( "cliente", JoinType.LEFT );
+        Join<Object, Object> ordem = from.join( "ordemServico", JoinType.LEFT );
         
         return builder.construct( PedidoPesquisaDTO.class, from.get( "codigo" ), from.get( "pedido" ),
-                from.get( "data" ), from.get( "status" ), pedidoPor.get( "nome" ) );
+                from.get( "data" ), from.get( "status" ), pedidoPor.get( "nome" ), cliente.get( "nome" ), ordem.get( "numero" ) );
     }
     
     @Override
@@ -59,6 +62,12 @@ public class PedidoRepositoryImpl extends RepositoryImplDto<PedidoFilter, Pedido
         
         if( isNotNull( filtro.getStatus( ) ) )
             predicates.add( builder.equal( from.get( PedidoFilter.STATUS ), filtro.getStatus( ) ) );
+        
+        if( isNotNull( filtro.getCliente( ) ) )
+            predicates.add( builder.equal( from.get( PedidoFilter.CLIENTE ), filtro.getCliente( ) ) );
+        
+        if( isNotNull( filtro.getOrdemServico( ) ) )
+            predicates.add( builder.equal( from.get( PedidoFilter.ORDEMSERVICO ), filtro.getOrdemServico( ) ) );
         
         return predicates.toArray( new Predicate[predicates.size( )] );
     }

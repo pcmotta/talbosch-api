@@ -39,6 +39,12 @@ public class PedidoLog extends ModelLog<Pedido>
         logCadastro.append( logService.log( "Chegada da Nota Fiscal: ", isAlteracao, formatarData( pedidoOld.getChegadaNotaFiscal( ) ), 
                 formatarData( pedidoNew.getChegadaNotaFiscal( ) ) ) );
         
+        logCadastro.append( logService.log( "Cliente", isAlteracao, pedidoOld.getCliente( ) == null ? "" : pedidoOld.getCliente( ).getCodigo( ), 
+                pedidoNew.getCliente( ) == null ? "" : pedidoNew.getCliente( ).getCodigo( ) ) );
+        
+        logCadastro.append( logService.log( "Ordem de Serviço", isAlteracao, pedidoOld.getOrdemServico( ) == null ? "" : pedidoOld.getOrdemServico( ).getNumero( ), 
+                pedidoNew.getOrdemServico( ) == null ? "" : pedidoNew.getOrdemServico( ).getNumero( ) ) );
+        
         logCadastro.append( logService.log( "Pedido Por: ", isAlteracao, pedidoOld.getPedidoPor( ).getCodigo( ), 
                 pedidoNew.getPedidoPor( ).getCodigo( ) ) );
         
