@@ -1,18 +1,22 @@
 package br.com.attomtech.talbosch.api.dto;
 
+import java.math.BigDecimal;
+
 import br.com.attomtech.talbosch.api.model.Peca;
 
 public class PecaDTO
 {
-    private String  codigo;
-    private String  descricao;
-    private boolean ativo;
+    private String     codigo;
+    private String     descricao;
+    private BigDecimal valor;
+    private boolean    ativo;
 
     public PecaDTO( Peca peca )
     {
         this.codigo = peca.getCodigo( );
         this.descricao = peca.getDescricao( );
         this.ativo = peca.isAtivo( );
+        this.valor = peca.getValor( );
     }
 
     public String getCodigo( )
@@ -43,5 +47,15 @@ public class PecaDTO
     public void setDescricao( String descricao )
     {
         this.descricao = descricao;
+    }
+
+    public BigDecimal getValor( )
+    {
+        return valor;
+    }
+
+    public void setValor( BigDecimal valor )
+    {
+        this.valor = valor;
     }
 }
