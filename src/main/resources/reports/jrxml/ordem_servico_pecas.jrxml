@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ordem_servico_pecas" pageWidth="555" pageHeight="842" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="ef8073bd-4205-464e-80b4-c1d25a050c9c">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<field name="quantidade" class="java.lang.Integer"/>
+	<field name="codigo" class="java.lang.String"/>
+	<field name="descricao" class="java.lang.String"/>
+	<field name="valor" class="java.math.BigDecimal"/>
+	<field name="total" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="14" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="0" width="1" height="13" uuid="cbb8838f-c689-4833-b9a3-f9c3ba42880a"/>
+			</line>
+			<line>
+				<reportElement x="70" y="0" width="1" height="13" uuid="b1f33e45-118b-4c7f-8282-68573c30e55b"/>
+			</line>
+			<line>
+				<reportElement x="160" y="0" width="1" height="13" uuid="2d6fdd60-c6e9-4def-97e8-4fa1d88e52ab"/>
+			</line>
+			<line>
+				<reportElement x="435" y="0" width="1" height="13" uuid="27f87fac-8239-4034-90eb-cfcfd3c412ef"/>
+			</line>
+			<line>
+				<reportElement x="495" y="0" width="1" height="13" uuid="c7bf4263-22ce-41f0-bf76-65227c70bc21"/>
+			</line>
+			<line>
+				<reportElement x="555" y="0" width="1" height="13" uuid="8fd700e9-ba5a-4af6-bc85-d38f9a19c3cf"/>
+			</line>
+			<line>
+				<reportElement x="0" y="13" width="555" height="1" uuid="6518f5ab-01a3-4b9a-bb7e-e8b29098352c"/>
+			</line>
+			<textField isBlankWhenNull="true">
+				<reportElement x="1" y="0" width="69" height="13" uuid="76d67c3e-cc8d-45a2-8a54-e0a059a1fde7"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{quantidade}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="71" y="0" width="89" height="13" uuid="b4975ff3-0955-4f46-ac77-0a5e8bd9b85a"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{codigo}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="161" y="0" width="274" height="13" uuid="372bce1e-b88d-4e4b-a604-abf291365798"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descricao}]]></textFieldExpression>
+			</textField>
+			<textField pattern="R$ #,##0.00" isBlankWhenNull="true">
+				<reportElement x="436" y="0" width="59" height="13" uuid="d80d6a84-4bb2-49e8-b818-50b755597637"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{valor}]]></textFieldExpression>
+			</textField>
+			<textField pattern="R$ #,##0.00" isBlankWhenNull="true">
+				<reportElement x="496" y="0" width="59" height="13" uuid="821166e8-54ab-464f-a473-41cdafd06c36"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{total}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>
